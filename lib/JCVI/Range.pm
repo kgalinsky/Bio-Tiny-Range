@@ -16,13 +16,13 @@ package JCVI::Range;
 use strict;
 use warnings;
 
-use base qw( JCVI::Range::Interface );
+use base qw( JCVI::Range::Base );
 
 use Carp;
 use List::Util qw( min max );
 use Params::Validate;
 
-use version; our $VERSION = qv('0.5.0');
+use version; our $VERSION = qv('0.5.1');
 
 =head1 NAME
 
@@ -30,7 +30,7 @@ JCVI::Range - class for ranges on genetic sequence data
 
 =head1 VERSION
 
-Version 0.5.0
+Version 0.5.1
 
 =head1 SYNOPSIS
 
@@ -75,9 +75,9 @@ my $LOWER_INDEX  = 0;
 my $LENGTH_INDEX = 1;
 my $STRAND_INDEX = 2;
 
-our $INT_REGEX     = qr/^[+-]?\d+$/;
-our $POS_INT_REGEX = qr/^\d+$/;
-our $STRAND_REGEX  = qr/^[+-]?[01]$/;
+our $NON_NEG_INT_REGEX = qr/^\d+$/;
+our $POS_INT_REGEX     = qr/^[1-9]\d*$/;
+our $STRAND_REGEX      = qr/^[+-]?[01]$/;
 
 =head1 CONSTRUCTORS
 
@@ -90,7 +90,8 @@ our $STRAND_REGEX  = qr/^[+-]?[01]$/;
     my $range = JCVI::Range->new( $lower, $length );
     my $range = JCVI::Range->new( $lower, $length, $strand );
 
-Basic constructor. Pass lower, length and strand.
+Basic constructor. Pass lower, length and strand. If not provided, lower and
+length default to 0, strand defaults to undef.
 
 =cut
 
@@ -99,7 +100,7 @@ sub new {
     my $self  = [
         validate_pos(
             @_,
-            ( { default => 0, regex => $POS_INT_REGEX } ) x 2,
+            ( { default => 0, regex => $NON_NEG_INT_REGEX } ) x 2,
             { default => undef, regex => $STRAND_REGEX }
         )
     ];
@@ -136,11 +137,11 @@ sub new_lus {
     my $class = shift;
     my ( $lower, $upper, $strand ) = validate_pos(
         @_,
-        ( { regex => $POS_INT_REGEX } ) x 2,
+        ( { regex => $NON_NEG_INT_REGEX } ) x 2,
         { optional => 1, regex => $STRAND_REGEX }
     );
     my $length = $upper - $lower;
-    $class->new( $lower, $length, $strand );
+    return bless( [ $lower, $length, $strand ], $class );
 }
 
 =head2 new_ul
@@ -162,7 +163,7 @@ sequencing gaps:
 sub new_ul {
     my $class = shift;
     my ( $upper, $length ) =
-      validate_pos( @_, ( { regex => $POS_INT_REGEX } ) x 2 );
+      validate_pos( @_, ( { regex => $NON_NEG_INT_REGEX } ) x 2 );
     $class->new( $upper - $length, $length );
 }
 
@@ -173,15 +174,18 @@ sub new_ul {
 If another object implements the required lower/upper/strand methods defined by
 the JCVI::Range interface, you can cast it as a JCVI::Range object. Also, if
 your range-like object implements the get_lus method (returning lower, upper
-and strand as an arrayref), then cast will use that method instead. 
+and strand as an arrayref), then cast will use that method instead (useful for
+classes where getting this data requires computationally expensive
+initialization that can be shared among the different methods).
 
 =cut
 
 sub cast {
     my $class = shift;
-    my ($object) = validate_pos( @_, { can => [qw( lower upper strand )]});
+    my ($object) = validate_pos( @_, { can => [qw( lower upper strand )] } );
 
-    return $class->new_lus( @{ $object->get_lus } ) if ($object->can('get_lus'));
+    return $class->new_lus( @{ $object->get_lus } )
+      if ( $object->can('get_lus') );
     return $class->new_lus( map { $object->$_ } qw( lower upper strand ) );
 }
 
@@ -204,7 +208,7 @@ sub lower {
 
     # Validate the lower bound
     croak 'Lower bound must be a non-negative integer'
-      unless ( $_[0] =~ /$POS_INT_REGEX/ );
+      unless ( $_[0] =~ /$NON_NEG_INT_REGEX/ );
 
     # Adjust the length and lower bound
     $self->_set_length( $self->upper() - $_[0] );
@@ -248,7 +252,7 @@ sub _set_length {
 
     # Validate the length
     croak 'Length must be a non-negative integer'
-      unless ( $_[0] =~ /$POS_INT_REGEX/ );
+      unless ( $_[0] =~ /$NON_NEG_INT_REGEX/ );
 
     return $self->[$LENGTH_INDEX] = $_[0] * 1;
 }
@@ -284,14 +288,13 @@ sub strand {
 
 =head1 COMBINATION METHODS
 
-Returns a new set of range given two range
+Returns a new range given two ranges
 
 =cut
 
 =head2 intersection
 
     my $range = $a->intersection($b);
-    my $range = intersection( $a, $b ); 
 
 Returns the intersection of two ranges. If they don't overlap, return undef.
 
@@ -314,7 +317,38 @@ sub intersection {
 
     # Create a new object of the same class as self
     my $class = ref($self);
-    return $class->new( $lower, $length, $s1 ) if ( $s1 == $s2 );
+    return $class->new( $lower, $length, $s1 )
+      if ( ( defined $s1 ) && ( defined $s2 ) && ( $s1 == $s2 ) );
+    return $class->new( $lower, $length );
+}
+
+=head2 union
+
+    my $range = $a->union($b);
+
+Returns the union of two ranges. If they don't overlap, return undef.
+
+=cut
+
+sub union {
+    my $self = shift;
+
+    my ($range) = validate_pos( @_, { can => [qw( lower upper strand )] } );
+
+    return undef unless ( $self->overlap($range) );
+
+    # Get endpoints of intersection
+    my $lower = min( map { $_->lower } $self, $range );
+    my $upper = max( map { $_->upper } $self, $range );
+    my $length = $upper - $lower;
+
+    # Get strands for comparison
+    my ( $s1, $s2 ) = map { $_->strand } $self, $range;
+
+    # Create a new object of the same class as self
+    my $class = ref($self);
+    return $class->new( $lower, $length, $s1 )
+      if ( ( defined $s1 ) && ( defined $s2 ) && ( $s1 == $s2 ) );
     return $class->new( $lower, $length );
 }
 
@@ -324,39 +358,13 @@ sub intersection {
 
 =head1 BUGS
 
-Please report any bugs or feature requests to
-C<bug-jcvi-range at rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=JCVI-Range>.
-I will be notified, and then you'll automatically be notified of progress on
-your bug as I make changes.
+Please report any bugs or feature requests through JIRA.
 
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
     perldoc JCVI::Range
-
-You can also look for information at:
-
-=over 4
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/JCVI-Range>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/JCVI-Range>
-
-=item * RT: CPAN's request tracker
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=JCVI-Range>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/JCVI-Range>
-
-=back
 
 =head1 ACKNOWLEDGEMENTS
 
