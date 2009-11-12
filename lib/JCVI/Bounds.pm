@@ -1,15 +1,14 @@
-# $Author $
-# $Date $
-# $Revision $
-# $HeadURL $
+# $Author$
+# $Date$
+# $Revision$
+# $HeadURL$
 
 package JCVI::Bounds;
 
 use strict;
 use warnings;
 
-use version;
-our $VERSION = qv('0.2.0');
+use version; our $VERSION = qv('0.2.1');
 
 =head1 NAME
 
@@ -17,7 +16,7 @@ JCVI::Bounds - class for boundaries on genetic sequence data
 
 =head1 VERSION
 
-Version 0.2.0
+Version 0.2.1
 
 =cut 
 
