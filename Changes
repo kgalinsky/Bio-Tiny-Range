@@ -1,5 +1,11 @@
 Revision history for JCVI-Bounds
 
+0.4.4   Sep 21 2009
+  - Added helper methods to simplify and spliced methods in Set::Interface
+
+0.4.3   Sep 18 2009
+  - Renamed bounds in Set::Interface to exons
+
 0.4.2   Sep  8 2009
   - Renamed spliced/splength methods in Set::Interface for clarity
 
