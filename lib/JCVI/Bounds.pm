@@ -22,7 +22,7 @@ use Carp;
 use List::Util qw( min max );
 use Params::Validate;
 
-use version; our $VERSION = qv('0.4.4');
+use version; our $VERSION = qv('0.4.5');
 
 =head1 NAME
 
@@ -30,7 +30,7 @@ JCVI::Bounds - class for boundaries on genetic sequence data
 
 =head1 VERSION
 
-Version 0.4.4
+Version 0.4.5
 
 =head1 SYNOPSIS
 
@@ -194,7 +194,7 @@ sub lower {
       unless ( $_[0] =~ /$POS_INT_REGEX/ );
 
     # Adjust the length and lower bound
-    $self->length( $self->upper() - $_[0] );
+    $self->_length( $self->upper() - $_[0] );
     return $self->[$LOWER_INDEX] = $_[0];
 
 }
