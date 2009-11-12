@@ -14,8 +14,10 @@ JCVI::Bounds::Set - A set of bounds
 
 =cut 
 
+use base qw( JCVI::Bounds::Interface );
+
 use Carp;
-use List::Util qw(reduce min max);
+use List::Util qw(min max sum);
 use Params::Validate;
 
 use JCVI::Bounds;
@@ -51,16 +53,18 @@ These functions create new bounds objects
 
 =cut
 
-=head2 bounds
+=head2 to_bounds
 
-    my $bounds = $set->bounds();
+    my $bounds = $set->to_bounds();
 
 Return a bounds object with the same endpoints and strand as the set.
 
 =cut
 
-sub bounds {
+sub to_bounds {
     my $self = shift;
+
+    return undef unless (@$self);
 
     my $lower  = $self->lower;
     my $upper  = $self->upper;
@@ -86,7 +90,7 @@ Sort bounds in the set
 sub sort {
     my $self  = shift;
     my $class = ref $self;
-    @$self = sort { $a <=> $b } @$self;
+    @$self = sort { JCVI::Bounds::relative( $a, $b ) } @$self;
     bless $self, $class;
 }
 
@@ -148,7 +152,7 @@ sub strand {
         # Assign current to strand
         $strand = $current if ( defined $current );
     }
-    
+
     return $strand;
 }
 
@@ -162,10 +166,7 @@ Return lower bound
 
 # TODO allow setting of bounds
 
-sub lower {
-    my $self = shift;
-    return min map { $_->lower } @$self;
-}
+sub lower { return min map { $_->lower } @{shift()} }
 
 =head2 upper
 
@@ -175,58 +176,46 @@ Return upper bound
 
 =cut
 
-sub upper {
-    my $self = shift;
-    return max map { $_->upper } @$self;
-}
-
-=head2 length
-
-    my $length = $set->length();
-
-Return distance between upper and lower
-
-=cut
-
-sub length {
-    my $self = shift;
-    return undef unless (@$self);
-    return $self->upper - $self->lower;
-}
-
-=head2 end5
-
-Stolen from JCVI::Bounds
-
-=cut
-
-*end5 = \&JCVI::Bounds::end5;
-
-=head2 end3
-
-Stolen from JCVI::Bounds
-
-=cut
-
-*end3 = \&JCVI::Bounds::end3;
+sub upper { return max map { $_->upper } @{shift()} }
 
 sub _end {
     my $self = shift;
     return undef unless (@$self);
-    &JCVI::Bounds::_end( $self, @_ );
+    $self->SUPER::_end( @_ );
 }
 
-=head2 string
+=head1 ADAPTED METHODS
 
-Extend the one in JCVI::Bounds
+These are methods that are similar to some of the bounds-like ones, but are
+relevant only in a set context
 
 =cut
 
-sub string {
-    my $self = shift;
+=head2 spliced
 
-    return '[ ]' unless (@$self);
-    &JCVI::Bounds::string( $self, @_ );
+Spliced sequence
+
+=cut
+
+sub spliced {
+    my $self = shift;
+    return undef unless (@$self);
+    
+    # Join the sequence from each seq_ref from calling sequence on every bound
+    my $sequence = join( '', map { $$_ } map { $_->sequence(@_) } @$self );
+    return \$sequence;
+}
+
+=head2 splength
+
+Spliced length
+
+=cut
+
+sub splength {
+    my $self = shift;
+    return undef unless (@$self);
+    return sum map { $_->length } @$self;
 }
 
 1;

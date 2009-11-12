@@ -8,7 +8,7 @@ package JCVI::Bounds;
 use strict;
 use warnings;
 
-use version; our $VERSION = qv('0.2.4');
+use version; our $VERSION = qv('0.3.0');
 
 =head1 NAME
 
@@ -16,19 +16,15 @@ JCVI::Bounds - class for boundaries on genetic sequence data
 
 =head1 VERSION
 
-Version 0.2.4
+Version 0.3.0
 
 =cut 
+
+use base qw( JCVI::Bounds::Interface );
 
 use Exporter 'import';
 our @EXPORT_OK = qw( equal overlap relative intersection );
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
-
-use overload
-  '=='   => \&equal,
-  '<=>'  => \&relative,
-  '""'   => \&string,
-  'bool' => \&_bool;
 
 use Carp;
 use List::Util qw( min max );
@@ -69,8 +65,6 @@ and lower bounds.
     my $end5 = $bounds->end5;     # 134
     my $end3 = $bounds->end3;     # 87
     
-    my @sorted = sort { $a <=> $b } @bounds;
-
 =cut
 
 =head1 DESCRIPTION
@@ -243,57 +237,6 @@ sub phase {
     return shift->length % 3;
 }
 
-=head2 end5
-
-    $end5 = $bounds->end5();
-    $bounds->end5($end5);
-
-Get/set 5' end
-
-=cut
-
-sub end5 { shift->_end( 1, @_ ) }
-
-=head2 end3
-
-    $end3 = $bounds->end3();
-    $bounds->end3($end3);
-
-Get/set 3' end
-
-=cut
-
-sub end3 { shift->_end( -1, @_ ) }
-
-# Does the actual work of figuring out the end
-sub _end {
-    my $self = shift;
-
-    # $test is "On what strand does the 5' end correspond to the lower bound?"
-    my $test = shift;
-
-    my ($end) = validate_pos( @_, { regex => $POS_INT_REGEX, optional => 1 } );
-
-    # If strand isn't defined or 0:
-    # Return the end if end5 = end3 (length == 1)
-    # Return undef (since we don't know which is which)
-    my $strand = $self->strand;
-    unless ($strand) {
-        if ( $self->length != 1 ) {
-            return undef;
-        }
-        return $self->lower + 1;
-    }
-
-    # Get the bound based upon the test
-    # For lower bounds, we want to offset the bound by 1
-    my ( $bound, $offset ) = $strand == $test ? ( 'lower', 1 ) : ( 'upper', 0 );
-
-    # Return/set the bound
-    return $self->$bound() + $offset unless ( defined $end );
-    return $self->$bound( $end - $offset ) + $offset;
-}
-
 =head1 PUBLIC METHODS
 
 =cut
@@ -338,65 +281,6 @@ sub _validate_extend {
     $upper = $lower unless ( defined $upper );
 
     return ( $lower, $upper );
-}
-
-=head2 sequence
-
-    $bounds_seq_ref = $bounds->sequence($seq_ref);
-
-Extract substring from a sequence reference. Returned as a reference. The same
-as:
-
-    substr($sequence, $bounds->lower, $bounds->length);
-
-=cut
-
-sub sequence {
-    my $self      = shift;
-    my ($seq_ref) = $self->_validate_sequence(@_);
-    my $substr    = substr( $$seq_ref, $self->lower, $self->length );
-    return \$substr;
-}
-
-# Make sure the sequence is a scalarref and that the upper bound is contained
-sub _validate_sequence {
-    my $self = shift;
-    return validate_pos(
-        @_,
-        {
-            type      => Params::Validate::SCALARREF,
-            callbacks => {
-                'bounds within sequence' => sub {
-                    return ( CORE::length( ${ $_[0] } ) >= $self->upper );
-                  }
-            }
-        }
-    );
-}
-
-=head2 string
-
-    print $bounds->string;
-    print $bounds;
-
-Returns a string for the bounds.
-
-=cut
-
-{
-
-    # Map from (0, 1, -1) to (. + -)
-    my @STRAND_MAP = qw( . + - );
-
-    sub string {
-        my $self   = shift;
-        my $strand = $self->strand();
-        return
-          sprintf q{[ %1s %s %s ] < 5' %s %s 3' >},
-          ( defined($strand) ? $STRAND_MAP[$strand] : '?' ),
-          map { sprintf "%${BOUNDS_WIDTH}d", $_ }
-          map { $self->$_ } qw( lower upper end5 end3 );
-    }
 }
 
 sub _bool {
