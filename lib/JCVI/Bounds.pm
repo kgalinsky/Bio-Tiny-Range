@@ -8,7 +8,7 @@ package JCVI::Bounds;
 use strict;
 use warnings;
 
-use version; our $VERSION = qv('0.2.3');
+use version; our $VERSION = qv('0.2.4');
 
 =head1 NAME
 
@@ -16,7 +16,7 @@ JCVI::Bounds - class for boundaries on genetic sequence data
 
 =head1 VERSION
 
-Version 0.2.3
+Version 0.2.4
 
 =cut 
 
@@ -24,7 +24,11 @@ use Exporter 'import';
 our @EXPORT_OK = qw( equal overlap relative intersection );
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
-use overload '==' => \&equal, '<=>' => \&relative, '""' => \&string;
+use overload
+  '=='   => \&equal,
+  '<=>'  => \&relative,
+  '""'   => \&string,
+  'bool' => \&_bool;
 
 use Carp;
 use List::Util qw( min max );
@@ -125,7 +129,7 @@ sub e53 {
 
     return bless( [ --$e5, $e3 - $e5, 1 ],  $class ) if ( $e5 < $e3 );
     return bless( [ --$e3, $e5 - $e3, -1 ], $class ) if ( $e3 < $e5 );
-    return bless( [ $e5 - 1, $e3 ], $class );
+    return bless( [ $e5 - 1, 1 ], $class );
 }
 
 =head2 ul
@@ -393,6 +397,10 @@ Returns a string for the bounds.
           map { sprintf "%${BOUNDS_WIDTH}d", $_ }
           map { $self->$_ } qw( lower upper end5 end3 );
     }
+}
+
+sub _bool {
+    return 1;
 }
 
 =head1 COMPARISON METHODS
