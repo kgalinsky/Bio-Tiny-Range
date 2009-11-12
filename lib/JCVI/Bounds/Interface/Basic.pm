@@ -1,5 +1,5 @@
 # File: Basic.pm
-# Author: Kevin
+# Author: kgalinsk
 # Created: Jul 13, 2009
 #
 # $Author$
@@ -118,7 +118,7 @@ sub phase {
 =head1 5'/3' END CONVERSION
 
 A bounds object should keep track of upper/lower and strand in some form. The
-folloing methods convert between those values and ends.
+following methods convert between those values and ends.
 
 =cut
 
@@ -148,7 +148,7 @@ sub end3 { shift->_end( -1, @_ ) }
 sub _end {
     my $self = shift;
 
-    # $test is "On what strand does the 5' end correspond to the lower bound?"
+    # $test is "On what strand does this end correspond to the lower bound?"
     my $test = shift;
 
     my ($end) = validate_pos( @_, { regex => qr/^\d+$/, optional => 1 } );
