@@ -9,9 +9,9 @@
 #
 # Copyright 2009, J. Craig Venter Institute
 #
-# JCVI::Bounds::Interface::Basic - basic bounds functionality
+# JCVI::Range::Interface::Basic - basic range functionality
 
-package JCVI::Bounds::Interface::Basic;
+package JCVI::Range::Interface::Basic;
 
 use strict;
 use warnings;
@@ -22,55 +22,54 @@ use Log::Log4perl qw(:easy);
 
 =head1 NAME
 
-JCVI::Bounds::Interface::Basic - basic bounds functionality
+JCVI::Range::Interface::Basic - basic range functionality
 
 =head1 SYNOPSIS
 
-    # You define these
-    $bounds->lower;
-    $bounds->upper;
-    $bounds->strand;
-
+    # You define these accessors/mutators
+    $range->lower();
+    $range->upper();
+    $range->strand();
+    
     # The following are provided based on the above
-    $bounds->end5;
-    $bounds->end3;
-    
-    $bounds->length;
-    $bounds->phase;
-    
-    $bounds->sequence;
+    $range->end5();
+    $range->end3();
 
-    $bounds->extend( $offset );
-    $bounds->extend( $lower_offset, $upper_offset );
+    $range->length();
+    
+    $range->sequence( \$sequence );
+
+    $range->extend( $offset );
+    $range->extend( $offset, $direction );
 
 =head1 DESCRIPTION
 
-This contains the most basic interface methods for bounds.
+This contains the most basic interface methods for range objects.
 
 =cut
 
 =head1 ABSTRACT METHODS
 
-These accessors must be defined in your class.
+These accessors/mutators must be defined in your class.
 
 =head2 lower
 
-    my $lower = $obj->lower();
-    $obj->lower($lower);
+    my $lower = $range->lower();
+    $range->lower($lower);
 
 Get/set lower bound. 
 
 =head2 upper
 
-    my $upper = $obj->upper();
-    $obj->upper($upper);
+    my $upper = $range->upper();
+    $range->upper($upper);
 
 Get/set upper bound.
 
 =head2 strand
 
-    my $strand = $obj->strand();
-    $obj->strand($strand);
+    my $strand = $range->strand();
+    $range->strand($strand);
 
 Get/set strand.
 
@@ -84,9 +83,9 @@ These are mixins that require the abstract methods to function
 
 =head2 length
 
-    my $length = $obj->length();
+    my $length = $range->length();
 
-Return distance between upper and lower bounds.
+Return distance between upper and lower range.
 
 =cut
 
@@ -101,31 +100,17 @@ sub length {
     return $upper - $lower;
 }
 
-=head2 phase
-
-    $phase = $bounds->phase();
-
-Get the phase (length % 3).
-
-=cut
-
-sub phase {
-    my $length = shift->length();
-    return undef unless ( defined $length );
-    return $length % 3;
-}
-
 =head1 5'/3' END CONVERSION
 
-A bounds object should keep track of upper/lower and strand in some form. The
+A range object should keep track of upper/lower and strand in some form. The
 following methods convert between those values and ends.
 
 =cut
 
 =head2 end5
 
-    $end5 = $bounds->end5();
-    $bounds->end5($end5);
+    $end5 = $range->end5();
+    $range->end5($end5);
 
 Get/set 5' end
 
@@ -135,8 +120,8 @@ sub end5 { shift->_end( 1, @_ ) }
 
 =head2 end3
 
-    $end3 = $bounds->end3();
-    $bounds->end3($end3);
+    $end3 = $range->end3();
+    $range->end3($end3);
 
 Get/set 3' end
 
@@ -167,7 +152,7 @@ sub _end {
     }
 
     # Get the bound based upon the test
-    # For lower bounds, we want to offset the bound by 1
+    # For lower range, we want to offset the bound by 1
     my ( $bound, $offset ) = $strand == $test ? ( 'lower', 1 ) : ( 'upper', 0 );
 
     # Return/set the bound
@@ -177,25 +162,25 @@ sub _end {
 
 =head2 sequence
 
-    $sub_ref = $obj->sequence($seq_ref);
+    $sub_ref = $range->sequence($seq_ref);
 
 Extract substring from a sequence reference. Returned as a reference. The same
 as:
 
-    substr($sequence, $obj->lower, $obj->length);
+    substr( $sequence, $range->lower, $range->length );
 
 =cut
 
 sub sequence {
     my $self = shift;
 
-    # Validate that the sequence is a reference and contains the bounds
+    # Validate that the sequence is a reference and contains the range
     my ($seq_ref) = validate_pos(
         @_,
         {
             type      => Params::Validate::SCALARREF,
             callbacks => {
-                'contains bounds' =>
+                'contains range' =>
                   sub { CORE::length( ${ $_[0] } ) >= $self->upper }
             }
         }
@@ -221,9 +206,9 @@ sub sequence {
     $self = $self->extend( $offset );             # Extend both ends by $offset
     $self = $self->extend( $offset, $direction ); # Specify end to extend
 
-Extend/contract the bounds by the supplied offset in the specified direction. 
+Extend/contract the range by the supplied offset in the specified direction. 
 The direction is -1, 0, 1, with -1 meaning to extend the lower bound, 0 to
-extend both bounds (default), and 1 to extend the upper bound. To contract,
+extend both range (default), and 1 to extend the upper bound. To contract,
 supply a negative offset.
 
 =cut
