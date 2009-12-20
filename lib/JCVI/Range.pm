@@ -140,7 +140,10 @@ sub new_lus {
         ( { regex => $NON_NEG_INT_REGEX } ) x 2,
         { optional => 1, regex => $STRAND_REGEX }
     );
+
     my $length = $upper - $lower;
+    croak 'Upper bound must not be less than lower bound' if ( $length < 0 );
+
     return bless( [ $lower, $length, $strand ], $class );
 }
 
@@ -164,7 +167,11 @@ sub new_ul {
     my $class = shift;
     my ( $upper, $length ) =
       validate_pos( @_, ( { regex => $NON_NEG_INT_REGEX } ) x 2 );
-    $class->new( $upper - $length, $length );
+
+    my $lower = $upper - $length;
+    croak 'Upper bound must be greater than length' unless ( $lower >= 0 );
+
+    return bless( [ $lower, $length ], $class );
 }
 
 =head2 cast
