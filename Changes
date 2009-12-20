@@ -1,5 +1,9 @@
 Revision history for JCVI::Range
 
+0.5.2   Dec 19 2009
+  - Removed remnants of Interface
+  - Renamed spaceship to compare
+
 0.5.1
   - Renamed regular expressions
   - 5' and 3' end properly validated to be positive integers

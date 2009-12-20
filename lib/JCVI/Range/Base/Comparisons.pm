@@ -20,7 +20,8 @@ use Params::Validate;
 use Log::Log4perl qw(:easy);
 
 use overload
-  '<=>' => \&spaceship,
+  'cmp' => \&compare,
+  '<=>' => \&compare,
   '=='  => \&equal;
 
 =head1 NAME
@@ -53,18 +54,20 @@ our @LUS = qw(lower upper strand);
 
 =cut
 
-=head2 spaceship
+=head2 compare
 
-    my @sorted = sort { $a->spaceship($b) } @range;
-    my @sorted = sort { $a <=> $b } @range;
+    my @sorted = sort { $a->compare($b) } @ranges;
+    my @sorted = sort { $a <=> $b } @ranges;
+	my @sorted = sort { $a cmp $b } @ranges;
+	my @sorted = sort @ranges;
 
-Spaceship operator for range. Returns -1, 0 or 1 depending upon the relative
-position of two range. Tries to order based upon lower bound, but if those are
-the same, then it tries to order based upon upper bound.
+Range comparator. Returns -1, 0 or 1 depending upon the relative position of
+two range. Tries to order based upon lower bound, but if those are the same,
+then it tries to order based upon upper bound.
 
 =cut
 
-sub spaceship {
+sub compare {
     my $self = shift;
     my ($bound) = validate_pos( @_, { can => [qw(lower upper)] }, 0 );
     return ( ( $self->lower <=> $bound->lower )
