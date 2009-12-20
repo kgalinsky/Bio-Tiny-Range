@@ -52,7 +52,7 @@ sub new {
     return $self;
 }
 
-sub _exons { return $_[0] }
+sub _ranges { return $_[0] }
 
 =head1 SET MANIPULATION METHODS
 
@@ -85,9 +85,9 @@ Push range onto set. Validate each bound.
 
 sub push {
     my $self = shift;
-    my @exons =
+    my @ranges =
       validate_pos( @_, ( { can => [qw( lower upper strand )] } ) x @_ );
-    CORE::push @$self, @exons;
+    CORE::push @$self, @ranges;
 }
 
 1;

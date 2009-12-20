@@ -34,9 +34,9 @@ use JCVI::Range;
 
 =cut
 
-=head2 _exons
+=head2 _ranges
 
-    my $range = $set->_exons();
+    my $range = $set->_ranges();
 
 This is the only method you need to define in your module. It returns an array
 of ranges. It won't be modified, so it is ok to return an internal data
@@ -44,9 +44,9 @@ structure for speed.
 
 Many methods below will have two definitions; a public one and a private one
 prefixed with and underscore ('_'). The public one simply calls the private one
-and passes the output of _exons to it. The reason for this is that _exons may
+and passes the output of _ranges to it. The reason for this is that _ranges may
 be expensive to run for some implementations of this interface, and there would
-be a speed boost from computing the set of exons once, but passing it around
+be a speed boost from computing the set of ranges once, but passing it around
 to several methods for computation.
 
 =cut
@@ -55,17 +55,17 @@ to several methods for computation.
 
 =cut
 
-=head2 exons
+=head2 ranges
 
-    my $range = $set->exons();
+    my $range = $set->ranges();
 
 Returns an arrayref of the range in the set. This arrayref is different from
-the one returned by _exons because the order of range may be changed, but it
+the one returned by _ranges because the order of range may be changed, but it
 won't affect the actual data structure of the set.
 
 =cut
 
-sub exons { [ @{ shift->_exons() } ] }
+sub ranges { [ @{ shift->_ranges() } ] }
 
 =head1 BOUNDS MAKERS
 
@@ -83,7 +83,7 @@ Return a JCVI::Range object with the same endpoints and strand as the set.
 
 sub simplify {
     my $self = shift;
-    $self->_simplify( @_, $self->_exons );
+    $self->_simplify( @_, $self->_ranges );
 }
 
 sub _simplify {
@@ -111,7 +111,7 @@ Return an arrayref set of range which are the introns.
 
 sub introns {
     my $self   = shift;
-    my $range = $self->_exons();
+    my $range = $self->_ranges();
 
     return undef unless (@$range);
 
@@ -146,7 +146,7 @@ Returns the strand.
 
 sub strand {
     my $self = shift;
-    $self->_strand( @_, $self->_exons );
+    $self->_strand( @_, $self->_ranges );
 }
 
 sub _strand {
@@ -213,7 +213,7 @@ Return/set lower bound
 
 sub lower {
     my $self = shift;
-    $self->_lower( @_, $self->_exons );
+    $self->_lower( @_, $self->_ranges );
 }
 
 sub _lower {
@@ -241,7 +241,7 @@ Return upper bound
 
 sub upper {
     my $self = shift;
-    $self->_upper( @_, $self->_exons );
+    $self->_upper( @_, $self->_ranges );
 }
 
 sub _upper {
@@ -274,7 +274,7 @@ Spliced sequence
 
 sub spliced_sequence {
     my $self = shift;
-    $self->_spliced_sequence( @_, $self->_exons );
+    $self->_spliced_sequence( @_, $self->_ranges );
 }
 
 sub _spliced_sequence {
@@ -296,7 +296,7 @@ Spliced length
 
 sub spliced_length {
     my $self = shift;
-    $self->_spliced_length( @_, $self->_exons );
+    $self->_spliced_length( @_, $self->_ranges );
 }
 
 sub _spliced_length {

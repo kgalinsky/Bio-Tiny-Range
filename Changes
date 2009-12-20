@@ -2,7 +2,8 @@ Revision history for JCVI::Range
 
 0.5.3
   - Fixed parameter validation in new_lus
-
+  - Renamed exons to ranges in Set
+  
 0.5.2   Dec 19 2009
   - Removed remnants of Interface
   - Renamed spaceship to compare
