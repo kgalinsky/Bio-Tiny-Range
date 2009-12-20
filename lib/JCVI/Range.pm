@@ -22,7 +22,7 @@ use Carp;
 use List::Util qw( min max );
 use Params::Validate;
 
-use version; our $VERSION = qv('0.5.2');
+use version; our $VERSION = qv('0.5.3');
 
 =head1 NAME
 
