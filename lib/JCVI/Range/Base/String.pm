@@ -19,7 +19,7 @@ use warnings;
 use Params::Validate qw( validate_with );
 use Log::Log4perl qw(:easy);
 
-use overload '""' => \&_string;
+use overload '""' => \&_string, fallback => 1;
 
 =head1 NAME
 

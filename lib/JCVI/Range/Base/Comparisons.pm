@@ -20,9 +20,10 @@ use Params::Validate;
 use Log::Log4perl qw(:easy);
 
 use overload
-  'cmp' => \&compare,
-  '<=>' => \&compare,
-  '=='  => \&equal;
+  'cmp'    => \&compare,
+  '<=>'    => \&compare,
+  '=='     => \&equal,
+  fallback => 1;
 
 =head1 NAME
 
