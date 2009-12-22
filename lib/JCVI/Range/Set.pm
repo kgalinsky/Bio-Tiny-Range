@@ -70,7 +70,7 @@ Sort range in the set
 
 sub sort {
     my $self = shift;
-    @$self = sort { $a <=> $b } @$self;
+    @$self = sort @$self;
     return [ @$self ];
 }
 
