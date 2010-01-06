@@ -22,6 +22,7 @@ use Log::Log4perl qw(:easy);
 use overload
   'cmp'    => \&compare,
   '<=>'    => \&compare,
+  'eq'     => \&equal,
   '=='     => \&equal,
   fallback => 1;
 
