@@ -2,19 +2,19 @@
 
 use Test::More 'no_plan';
 
-use JCVI::Range::Set;
-use JCVI::Range;
+use Bio::Tiny::Range::Set;
+use Bio::Tiny::Range;
 
-my @a = map { JCVI::Range->new( $_ * 20, 10, 1 ) }  ( 0, 1 );
-my @b = map { JCVI::Range->new( $_ * 20, 10, -1 ) } ( 1, 0 );
+my @a = map { Bio::Tiny::Range->new( $_ * 20, 10, 1 ) }  ( 0, 1 );
+my @b = map { Bio::Tiny::Range->new( $_ * 20, 10, -1 ) } ( 1, 0 );
 
 my ( $A, $B );
 
-ok( JCVI::Range::Set->new(),        'new' );
-ok( JCVI::Range::Set->new( $a[0] ), 'new with 1 + strand exon' );
-ok( $A = JCVI::Range::Set->new(@a), 'new with 2 + strand exons' );
-ok( JCVI::Range::Set->new( $b[0] ), 'new with 1 - strand exon' );
-ok( $B = JCVI::Range::Set->new(@b), 'new with 2 - strand exons' );
+ok( Bio::Tiny::Range::Set->new(),        'new' );
+ok( Bio::Tiny::Range::Set->new( $a[0] ), 'new with 1 + strand exon' );
+ok( $A = Bio::Tiny::Range::Set->new(@a), 'new with 2 + strand exons' );
+ok( Bio::Tiny::Range::Set->new( $b[0] ), 'new with 1 - strand exon' );
+ok( $B = Bio::Tiny::Range::Set->new(@b), 'new with 2 - strand exons' );
 
 my @battery = (
     [ 'lower',  0,  0 ],
@@ -25,18 +25,18 @@ my @battery = (
 );
 
 foreach my $def (@battery) {
-    my ($test, $pos, $neg) = @$def;
-    
-    is ($A->$test, $pos, "+ $test correct");
-    is ($B->$test, $neg, "- $test correct");
+    my ( $test, $pos, $neg ) = @$def;
+
+    is( $A->$test, $pos, "+ $test correct" );
+    is( $B->$test, $neg, "- $test correct" );
 }
 
 my $a = $A->simplify;
 my $b = $B->simplify;
 
 foreach my $def (@battery) {
-    my ($test, $pos, $neg) = @$def;
-    
-    is ($a->$test, $pos, "+ $test bound correct");
-    is ($b->$test, $neg, "- $test bound correct");
+    my ( $test, $pos, $neg ) = @$def;
+
+    is( $a->$test, $pos, "+ $test bound correct" );
+    is( $b->$test, $neg, "- $test bound correct" );
 }

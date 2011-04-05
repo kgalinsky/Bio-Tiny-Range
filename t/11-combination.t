@@ -18,11 +18,11 @@ BEGIN {
 }
 
 use Test::More tests => scalar(@TESTS) * 4;
-use JCVI::Range;
+use Bio::Tiny::Range;
 
 foreach my $test (@TESTS) {
     my ( $range1, $range2, $intersection, $union ) =
-      map { $_ ? JCVI::Range->new_lus(@$_) : $_ } @$test;
+      map { $_ ? Bio::Tiny::Range->new_lus(@$_) : $_ } @$test;
     is_deeply(
         $range1->intersection($range2),
         $intersection,

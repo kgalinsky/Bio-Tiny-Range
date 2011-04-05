@@ -3,10 +3,10 @@
 use Test::More tests => 4;
 
 BEGIN {
-	use_ok( 'JCVI::Range' );
-    use_ok( 'JCVI::Range::Set' );
-    use_ok( 'JCVI::Range::Base' );
-    use_ok( 'JCVI::Range::Set::Base' );
+	use_ok( 'Bio::Tiny::Range' );
+    use_ok( 'Bio::Tiny::Range::Set' );
+    use_ok( 'Bio::Tiny::Range::Base' );
+    use_ok( 'Bio::Tiny::Range::Set::Base' );
 }
 
-diag( "Testing JCVI::Range $JCVI::Range::VERSION, Perl $], $^X" );
+diag( "Testing Bio::Tiny::Range $Bio::Tiny::Range::VERSION, Perl $], $^X" );

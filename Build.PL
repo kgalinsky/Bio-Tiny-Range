@@ -3,14 +3,14 @@ use warnings;
 use Module::Build;
 
 my $builder = Module::Build->new(
-    module_name         => 'JCVI::Range',
+    module_name         => 'Bio::Tiny::Range',
     license             => 'perl',
     dist_author         => 'Kevin Galinsky <kgalinsk@jcvi.org>',
-    dist_version_from   => 'lib/JCVI/Range.pm',
+    dist_version_from   => 'lib/Bio/Tiny/Range.pm',
     build_requires => {
         'Test::More' => 0,
     },
-    add_to_cleanup      => [ 'JCVI-Range-*' ],
+    add_to_cleanup      => [ 'Bio-Tiny-Range-*' ],
     create_makefile_pl => 'traditional',
 );
 
