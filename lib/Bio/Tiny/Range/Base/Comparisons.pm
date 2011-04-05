@@ -64,7 +64,7 @@ sub compare {
     my $self = shift;
     if ( ref( $_[0] ) ) {
         my ( $range, $reverse ) =
-          validate_pos( @_, { can => [qw(lower upper)] }, 0 );
+          validate_pos( @_, { can => \@LU }, 0 );
 
         return ( ( $self->lower <=> $range->lower )
               || ( $self->upper <=> $range->upper ) ) * ( $reverse ? -1 : 1 );
@@ -108,7 +108,7 @@ sub _contains {
     my $self = shift;
     if ( ref( $_[0] ) ) {
         my ( $range, $reverse ) =
-          validate_pos( @_, { can => [qw(lower upper)] }, 0 );
+          validate_pos( @_, { can => \@LU }, 0 );
 
         return ( ( $self->lower <= $range->lower )
               && ( $self->upper >= $range->upper ) ) * ( $reverse ? -1 : 1 );
