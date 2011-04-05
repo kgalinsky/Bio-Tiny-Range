@@ -49,18 +49,35 @@ our @LUS = qw(lower upper strand);
     my @sorted = sort { $a <=> $b } @ranges;
 	my @sorted = sort { $a cmp $b } @ranges;
 	my @sorted = sort @ranges;
+	
+	my @filtered = grep { $_ < $coordinate } @ranges
 
 Range comparator. Returns -1, 0 or 1 depending upon the relative position of
-two range. Tries to order based upon lower bound, but if those are the same,
-then it tries to order based upon upper bound.
+two ranges or a range and a coordinate. Ranges are ordered based upon lower
+bound and ties are broken by the upper bound. In the case of a coordinate,
+comparator returns -1 if the range is fully below the coordinate, 1 if it is
+fully above, and 0 if the coordinate is contained within the range.
 
 =cut
 
 sub compare {
     my $self = shift;
-    my ($bound) = validate_pos( @_, { can => [qw(lower upper)] }, 0 );
-    return ( ( $self->lower <=> $bound->lower )
-          || ( $self->upper <=> $bound->upper ) );
+    if ( ref( $_[0] ) ) {
+        my ( $bound, $reverse ) =
+          validate_pos( @_, { can => [qw(lower upper)] }, 0 );
+
+        return ( ( $self->lower <=> $bound->lower )
+              || ( $self->upper <=> $bound->upper ) ) * ( $reverse ? -1 : 1 );
+    }
+    else {
+        my ( $coord, $reverse ) = validate_pos( @_, { regex => qr/^\d+$/ }, 0 );
+
+        return (
+              $self->upper <= $coord ? -1
+            : $self->lower >= $coord ? 1
+            : 0
+        ) * ( $reverse ? -1 : 1 );
+    }
 }
 
 =head2 contains
