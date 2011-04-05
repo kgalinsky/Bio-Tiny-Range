@@ -6,7 +6,7 @@ use warnings;
 use Params::Validate qw( validate_with );
 use Log::Log4perl qw(:easy);
 
-use overload '""' => \&_string, fallback => 1;
+use overload '""' => \&_as_string, fallback => 1;
 
 =head1 NAME
 
@@ -15,9 +15,9 @@ Bio::Tiny::Range::Base::String - methods for printing out range objects
 =head1 SYNOPSIS
 
     print $range;
-    print $range->string;
-    print $range->string_lus;
-    print $range->string_53;
+    print $range->as_string;
+    print $range->as_string_lus;
+    print $range->as_string_53;
 
 =head1 DESCRIPTION
 
@@ -30,11 +30,11 @@ characters.
 
 =head1 PUBLIC METHODS
 
-=head2 string
+=head2 as_string
 
     print $range;
-    print $range->string;
-    print $range->string( \%params )
+    print $range->as_string;
+    print $range->as_string( \%params )
 
 Returns a string for the range or set. Valid parameters are:
 
@@ -54,12 +54,12 @@ my $DEFAULT_METHOD = 'lus';
 
 # Methods for the string
 my %METHOD_MAP = (
-    lus => \&string_lus,
-    s53 => \&string_53,
-    53  => \&string_53
+    lus => \&as_string_lus,
+    s53 => \&as_string_53,
+    53  => \&as_string_53
 );
 
-sub string {
+sub as_string {
     my $self = shift;
     my %p    = validate_with(
         params => \@_,
@@ -78,8 +78,8 @@ sub string {
 }
 
 # Exists so that overloading doesn't freak out string's parameter validation
-sub _string {
-    string(shift);
+sub _as_string {
+    as_string(shift);
 }
 
 =head2 default_string_method
@@ -132,10 +132,10 @@ sub default_string_integer_width {
     return $INT_WIDTH = $width;
 }
 
-=head2 string_lus
+=head2 as_string_lus
 
-    $self->string_lus();
-    $self->string_lus( { width => $width } )
+    $self->as_string_lus();
+    $self->as_string_lus( { width => $width } )
 
 Prints the object as [ $lower $upper $strand ]. Pads the output, so it will
 look like:
@@ -146,7 +146,7 @@ look like:
 
 =cut
 
-sub string_lus {
+sub as_string_lus {
     my $self = shift;
     my %p    = validate_with(
         params => \@_,
@@ -162,7 +162,7 @@ sub string_lus {
     # Return undef if a coordinate isn't defined
     return '[ ? ? ? ]' unless ( defined($lower) && defined($upper) );
 
-    # Get the strand string as +/-/. if it can be determined or ? otherwise
+    # Get the strand as_string as +/-/. if it can be determined or ? otherwise
     my $strand;
     $strand = '?' unless ( $self->can('strand') );
     $strand = $self->strand;
@@ -171,10 +171,10 @@ sub string_lus {
     return join( ' ', '[', _int( $p{width}, $lower, $upper ), $strand, ']' );
 }
 
-=head2 string_53
+=head2 as_string_53
 
-    $self->string_53();
-    $self->string_53( { width => $width } )
+    $self->as_string_53();
+    $self->as_string_53( { width => $width } )
 
 Prints the object as <5' $end5 $end3 3'>. Pads the output, so it will look
 like:
@@ -185,7 +185,7 @@ like:
 
 =cut
 
-sub string_53 {
+sub as_string_53 {
     my $self = shift;
     my %p    = validate_with(
         params => \@_,
