@@ -1,4 +1,7 @@
-Revision history for JCVI::Range
+Revision history for Bio::Tiny::Range
+
+0.5.4	Apr  5 2011
+  - Renamed from JCVI::Range to Bio::Tiny::Range
 
 0.5.3
   - Fixed parameter validation in new_lus

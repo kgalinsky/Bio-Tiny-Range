@@ -9,7 +9,7 @@ use Carp;
 use List::Util qw( min max );
 use Params::Validate;
 
-use version; our $VERSION = qv('0.5.3');
+use version; our $VERSION = qv('0.5.4');
 
 =head1 NAME
 
@@ -17,7 +17,7 @@ Bio::Tiny::Range - class for ranges on genetic sequence data
 
 =head1 VERSION
 
-Version 0.5.2
+Version 0.5.4
 
 =head1 SYNOPSIS
 
