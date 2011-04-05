@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 use Params::Validate;
-use Log::Log4perl qw(:easy);
 
 use overload
   'cmp'    => \&compare,
@@ -37,8 +36,8 @@ objects.
 =cut
 
 # Variables used for validations
-our @LU  = qw(lower upper);
-our @LUS = qw(lower upper strand);
+our @LU  = qw/lower upper/;
+our @LUS = qw/lower upper strand/;
 
 =head1 PUBLIC METHODS
 
