@@ -148,35 +148,35 @@ sub _strand {
     my $strand = $ranges->[0]->strand;
     push @normalize, $ranges->[0] unless ($strand);
 
-    for ( my $i = 1 ; $i < @$ranges ; $i++ ) {
-        my $current = $ranges->[$i]->strand;
+    $strand = reduce {
+        my $b_str = $b->strand;
 
-        # Where strand = +/-1 (not undef or 0)
-        if ($strand) {
-            if ($current) {
+        if ( !$b_str ) {
+            # Normalize strand for ranges where strand isn't +/-1
+            push @normalize, $b;
+            $a;
+        }
+        else {
+            unless ($a) { $b }
+            else {
 
                 # Return undef if two adjacent features are on opposite strands
                 # This means that one feature has strand == 1, and the other
                 # has strand == -1. A quick/easy test is to see if the product
                 # of the two strands is -1
-                return undef if ( $strand * $current == -1 );
+                return if ( $a * $b == -1 );
+                $a;
             }
-
-            else { push @normalize, $ranges->[$i] }
-
-            next;
         }
+    }   ( $strand, @$ranges[ 1 .. $#$ranges ] );
 
-        # Assign current to strand for cases where strand isn't +/-1
-        $strand = $current if ( defined $current );
-    }
-
-    # Set the strand of ranges whose strands are 0/undef where others are known
+    # Set strands for unstranded ranges if some were stranded
     if ($strand) {
         foreach my $range (@normalize) {
             $range->strand($strand);
         }
     }
+
     return $strand;
 }
 
