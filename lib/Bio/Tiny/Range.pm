@@ -363,7 +363,7 @@ Paolo Amedeo for his input when I was working on it.
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright (C) 2011 Kevin Galinsky, all rights reserved.
+Copyright (C) 2011 Kevin Galinsky
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
