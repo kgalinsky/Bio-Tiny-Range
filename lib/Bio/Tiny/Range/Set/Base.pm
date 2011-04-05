@@ -129,7 +129,7 @@ sub strand {
 
 sub _strand {
     my $self = shift;
-    my ($ranges) = @_;
+    my $ranges = pop(@_);
 
     return undef unless ( defined($ranges) && (@$ranges) );
 
@@ -157,14 +157,14 @@ sub _strand {
             $a;
         }
         else {
-            unless ($a) { $b }
+            unless ($a) { $b_str }
             else {
 
                 # Return undef if two adjacent features are on opposite strands
                 # This means that one feature has strand == 1, and the other
                 # has strand == -1. A quick/easy test is to see if the product
                 # of the two strands is -1
-                return if ( $a * $b == -1 );
+                return if ( $a * $b_str == -1 );
                 $a;
             }
         }
