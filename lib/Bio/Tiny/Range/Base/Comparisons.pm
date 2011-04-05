@@ -10,6 +10,8 @@ use overload
   'cmp'    => \&compare,
   'eq'     => \&equal,
   '=='     => \&equal,
+  '>='     => \&contains,
+  '<='     => \&inside,
   fallback => 1;
 
 =head1 NAME
@@ -50,22 +52,22 @@ our @LUS = qw(lower upper strand);
 	
 	my @filtered = grep { $_ lt $coordinate } @ranges
 
-Range comparator. Returns -1, 0 or 1 depending upon the relative position of
-two ranges or a range and a coordinate. Ranges are ordered based upon lower
-bound and ties are broken by the upper bound. In the case of a coordinate,
-comparator returns -1 if the range is fully below the coordinate, 1 if it is
-fully above, and 0 if the coordinate is contained within the range.
+Returns -1, 0 or 1 depending upon the relative position of two ranges or a
+range and a coordinate. Ranges are ordered based upon lower bound and ties are
+broken by the upper bound. In the case of a coordinate, compare returns -1 if
+the range is fully below the coordinate, 1 if it is fully above and 0 if the
+coordinate is contained within the range.
 
 =cut
 
 sub compare {
     my $self = shift;
     if ( ref( $_[0] ) ) {
-        my ( $bound, $reverse ) =
+        my ( $range, $reverse ) =
           validate_pos( @_, { can => [qw(lower upper)] }, 0 );
 
-        return ( ( $self->lower <=> $bound->lower )
-              || ( $self->upper <=> $bound->upper ) ) * ( $reverse ? -1 : 1 );
+        return ( ( $self->lower <=> $range->lower )
+              || ( $self->upper <=> $range->upper ) ) * ( $reverse ? -1 : 1 );
     }
     else {
         my ( $coord, $reverse ) = validate_pos( @_, { regex => qr/^\d+$/ }, 0 );
@@ -80,47 +82,43 @@ sub compare {
 
 =head2 contains
 
-    my $bool = $range->contains($point);
-
-Return true if range contain point.
-
-=cut
-
-sub contains {
-    my $self = shift;
-    my ($location) = validate_pos( @_, { regex => qr/^\d+$/ } );
-    return ( ( $self->lower <= $location ) && ( $self->upper >= $location ) );
-}
-
-=head2 outside
-
-    my $bool = $a->outside($b);
-
-Returns true if the first bound is outside the second.
-
-=cut
-
-sub outside {
-    my $self = shift;
-    my ($range) = validate_pos( @_, { can => \@LU } );
-    return ( ( $self->lower <= $range->lower )
-          && ( $self->upper >= $range->upper ) );
-}
-
 =head2 inside
 
-    my $bool = $a->inside($b);
+    my $bool = $range->contains($range2);
+    my $bool = $range->inside($range2);
 
-Returns true if the first bound is inside the second.
+    my $bool = $range >= $range2;
+    my $bool = $range <= $range2;
+
+    my $bool = $range->contains($coordinate);
+    my $bool = $range >= $coordinate;
+    my $bool = $coordinate <= $range;
+
+Tests to see if a range contains or is inside a second range. Can also be used
+to test if a range contains a coordinate. You can also use the >= and <=
+operators in place of set theory superset (E<supe>) and subset (E<sube>)
+comparisons. 
 
 =cut
 
-sub inside {
-    my $self = shift;
-    my ($range) = validate_pos( @_, { can => \@LU } );
-    return ( ( $self->lower >= $range->lower )
-          && ( $self->upper <= $range->upper ) );
+sub contains { shift->_contains(@_) }
+sub inside { shift->_contains( $_[0], ( 1 xor $_[1] ) ) }
 
+sub _contains {
+    my $self = shift;
+    if ( ref( $_[0] ) ) {
+        my ( $range, $reverse ) =
+          validate_pos( @_, { can => [qw(lower upper)] }, 0 );
+
+        return ( ( $self->lower <= $range->lower )
+              && ( $self->upper >= $range->upper ) ) * ( $reverse ? -1 : 1 );
+    }
+    else {
+        my ( $coord, $reverse ) = validate_pos( @_, { regex => qr/^\d+$/ }, 0 );
+        die 'Makes no sense to ask if a range is inside a coordinate'
+          if ($reverse);
+        return ( ( $self->upper >= $coord ) && ( $self->lower <= $coord ) );
+    }
 }
 
 =head2 equal
