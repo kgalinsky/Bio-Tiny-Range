@@ -23,6 +23,7 @@ Version 0.5.4
 
     my $range = Bio::Tiny::Range->new_53( 52, 143 );
 
+    # get the coordinates
     my $lower  = $range->lower;  # 51
     my $upper  = $range->upper;  # 143
     my $strand = $range->strand; # 1
@@ -30,6 +31,7 @@ Version 0.5.4
 
     my $seq_ref = $range->sequence(\$sequence); 
 
+    # get set coordinate information
     $range->lower(86);
     $range->upper(134);
     $range->strand(-1);
@@ -70,19 +72,19 @@ our $STRAND_REGEX      = qr/^[+-]?[01]$/;
 
 =cut
 
-=head2 new
+=head2 new_lls
 
-    my $range = Bio::Tiny::Range->new( );
-    my $range = Bio::Tiny::Range->new( $lower );
-    my $range = Bio::Tiny::Range->new( $lower, $length );
-    my $range = Bio::Tiny::Range->new( $lower, $length, $strand );
+    my $range = Bio::Tiny::Range->new_lls( );
+    my $range = Bio::Tiny::Range->new_lls( $lower );
+    my $range = Bio::Tiny::Range->new_lls( $lower, $length );
+    my $range = Bio::Tiny::Range->new_lls( $lower, $length, $strand );
 
-Basic constructor. Pass lower, length and strand. If not provided, lower and
-length default to 0, strand defaults to undef.
+Most direct constructor. Pass lower, length and strand. If not provided, lower
+and length default to 0, strand defaults to undef.
 
 =cut
 
-sub new {
+sub new_lls {
     my $class = shift;
     my $self  = [
         validate_pos(
