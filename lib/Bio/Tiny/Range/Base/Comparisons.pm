@@ -1,17 +1,4 @@
-# File: Comparisons.pm
-# Author: kgalinsk
-# Created: Jul 13, 2009
-#
-# $Author$
-# $Date$
-# $Revision$
-# $HeadURL$
-#
-# Copyright 2009, J. Craig Venter Institute
-#
-# JCVI::Range::Base::Comparisons - comparison methods for range objects
-
-package JCVI::Range::Base::Comparisons;
+package Bio::Tiny::Range::Base::Comparisons;
 
 use strict;
 use warnings;
@@ -28,7 +15,7 @@ use overload
 
 =head1 NAME
 
-JCVI::Range::Base::Comparisons - comparison methods for range objects
+Bio::Tiny::Range::Base::Comparisons - comparison methods for range objects
 
 =head1 SYNOPSIS
 

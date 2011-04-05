@@ -1,17 +1,4 @@
-# File: String.pm
-# Author: kgalinsk
-# Created: Jul 13, 2009
-#
-# $Author$
-# $Date$
-# $Revision$
-# $HeadURL$
-#
-# Copyright 2009, J. Craig Venter Institute
-#
-# JCVI::Range::Base::String - methods for printing out range objects
-
-package JCVI::Range::Base::String;
+package Bio::Tiny::Range::Base::String;
 
 use strict;
 use warnings;
@@ -23,7 +10,7 @@ use overload '""' => \&_string, fallback => 1;
 
 =head1 NAME
 
-JCVI::Range::Base::String - methods for printing out range objects
+Bio::Tiny::Range::Base::String - methods for printing out range objects
 
 =head1 SYNOPSIS
 
@@ -97,8 +84,8 @@ sub _string {
 
 =head2 default_string_method
 
-    my $method = JCVI::Range::Base::String->default_string_method();
-    JCVI::Range::Base::String->default_string_method( $method );
+    my $method = Bio::Tiny::Range::Base::String->default_string_method();
+    Bio::Tiny::Range::Base::String->default_string_method( $method );
     
     my $method = $range->default_string_method();
     $range->default_string_method( $method );
@@ -126,8 +113,8 @@ sub default_string_method {
 
 =head2 default_string_integer_width
 
-    my $width = JCVI::Range::Base::String->default_string_integer_width();
-    JCVI::Range::Base::String->default_string_integer_width( $width );
+    my $width = Bio::Tiny::Range::Base::String->default_string_integer_width();
+    Bio::Tiny::Range::Base::String->default_string_integer_width( $width );
     
     my $width = $range->default_string_integer_width();
     $range->default_string_integer_width( $width );

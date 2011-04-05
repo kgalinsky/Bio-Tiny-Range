@@ -1,28 +1,15 @@
-# File: Set.pm
-# Author: kgalinsk
-# Created: Apr 15, 2009
-#
-# $Author$
-# $Date$
-# $Revision$
-# $HeadURL$
-#
-# Copyright 2009, J. Craig Venter Institute
-#
-# JCVI::Range::Set - A set of ranges
-
-package JCVI::Range::Set;
+package Bio::Tiny::Range::Set;
 
 use strict;
 use warnings;
 
 =head1 NAME
 
-JCVI::Range::Set - A set of ranges
+Bio::Tiny::Range::Set - A set of ranges
 
 =cut 
 
-use base qw( JCVI::Range::Set::Base );
+use base qw( Bio::Tiny::Range::Set::Base );
 
 use Carp;
 use Params::Validate;
@@ -37,8 +24,8 @@ Create an array of ranges which follows the range interface.
 
 =head2 new
 
-    my $set = JCVI::Range::Set->new();
-    my $set = JCVI::Range::Set->new( @range );
+    my $set = Bio::Tiny::Range::Set->new();
+    my $set = Bio::Tiny::Range::Set->new( @range );
 
 Create a new set and push any range provided onto the set
 

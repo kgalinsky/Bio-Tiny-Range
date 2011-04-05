@@ -1,34 +1,21 @@
-# File: Base.pm
-# Author: kgalinsk
-# Created: Jul 13, 2009
-#
-# $Author$
-# $Date$
-# $Revision$
-# $HeadURL$
-#
-# Copyright 2009, J. Craig Venter Institute
-#
-# JCVI::Range::Set::Base - base class for sets of range
-
-package JCVI::Range::Set::Base;
+package Bio::Tiny::Range::Set::Base;
 
 use strict;
 use warnings;
 
 =head1 NAME
 
-JCVI::Range::Set::Base - base class for sets of range
+Bio::Tiny::Range::Set::Base - base class for sets of range
 
 =cut
 
-use base qw( JCVI::Range::Base );
+use base qw( Bio::Tiny::Range::Base );
 
 use Carp;
 use List::Util qw(min max sum);
 use Params::Validate;
 
-use JCVI::Range;
+use Bio::Tiny::Range;
 
 =head1 ABSTRACT METHODS
 
@@ -69,7 +56,7 @@ sub ranges { [ @{ shift->_ranges() } ] }
 
 =head1 BOUNDS MAKERS
 
-These functions create new JCVI::Range objects
+These functions create new Bio::Tiny::Range objects
 
 =cut
 
@@ -77,7 +64,7 @@ These functions create new JCVI::Range objects
 
     my $range = $set->simplify();
 
-Return a JCVI::Range object with the same endpoints and strand as the set.
+Return a Bio::Tiny::Range object with the same endpoints and strand as the set.
 
 =cut
 
@@ -98,7 +85,7 @@ sub _simplify {
 
     my $length = $upper - $lower;
 
-    return JCVI::Range->new( $lower, $length, $strand );
+    return Bio::Tiny::Range->new( $lower, $length, $strand );
 }
 
 =head2 introns
@@ -122,7 +109,7 @@ sub introns {
     my $a = $range->[0];
     for ( my $i = 1 ; $i < @$range ; $i++ ) {
         $b = $range->[$i];
-        push @$introns, JCVI::Range->new_lus( $a->upper, $b->lower );
+        push @$introns, Bio::Tiny::Range->new_lus( $a->upper, $b->lower );
         $a = $b;
     }
 

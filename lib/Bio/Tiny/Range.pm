@@ -1,22 +1,9 @@
-# File: Range.pm
-# Author: kgalinsk
-# Created: Apr 15, 2009
-#
-# $Author$
-# $Date$
-# $Revision$
-# $HeadURL$
-#
-# Copyright 2009, J. Craig Venter Institute
-#
-# JCVI::Range - class for ranges on genetic sequence data
-
-package JCVI::Range;
+package Bio::Tiny::Range;
 
 use strict;
 use warnings;
 
-use base qw( JCVI::Range::Base );
+use base qw( Bio::Tiny::Range::Base );
 
 use Carp;
 use List::Util qw( min max );
@@ -26,7 +13,7 @@ use version; our $VERSION = qv('0.5.3');
 
 =head1 NAME
 
-JCVI::Range - class for ranges on genetic sequence data
+Bio::Tiny::Range - class for ranges on genetic sequence data
 
 =head1 VERSION
 
@@ -34,7 +21,7 @@ Version 0.5.2
 
 =head1 SYNOPSIS
 
-    my $range = JCVI::Range->new_53( 52, 143 );
+    my $range = Bio::Tiny::Range->new_53( 52, 143 );
 
     my $lower  = $range->lower;  # 51
     my $upper  = $range->upper;  # 143
@@ -85,10 +72,10 @@ our $STRAND_REGEX      = qr/^[+-]?[01]$/;
 
 =head2 new
 
-    my $range = JCVI::Range->new( );
-    my $range = JCVI::Range->new( $lower );
-    my $range = JCVI::Range->new( $lower, $length );
-    my $range = JCVI::Range->new( $lower, $length, $strand );
+    my $range = Bio::Tiny::Range->new( );
+    my $range = Bio::Tiny::Range->new( $lower );
+    my $range = Bio::Tiny::Range->new( $lower, $length );
+    my $range = Bio::Tiny::Range->new( $lower, $length, $strand );
 
 Basic constructor. Pass lower, length and strand. If not provided, lower and
 length default to 0, strand defaults to undef.
@@ -109,7 +96,7 @@ sub new {
 
 =head2 new_53
 
-    my $range = JCVI::Range->new_53( $end5, $end3 );
+    my $range = Bio::Tiny::Range->new_53( $end5, $end3 );
 
 Create the class given 5' and 3' end coordinates.
 
@@ -126,8 +113,8 @@ sub new_53 {
 
 =head2 new_lus
 
-    my $range = JCVI::Range->new_lus( $lower, $upper );
-    my $range = JCVI::Range->new_lus( $lower, $upper, $strand );
+    my $range = Bio::Tiny::Range->new_lus( $lower, $upper );
+    my $range = Bio::Tiny::Range->new_lus( $lower, $upper, $strand );
     
 Create the class given lower and upper range, and possibly strand.
 
@@ -149,13 +136,13 @@ sub new_lus {
 
 =head2 new_ul
 
-    my $range = JCVI::Range->new_ul($upper, $length);
+    my $range = Bio::Tiny::Range->new_ul($upper, $length);
 
 Specify upper and length. Useful when using a regular expression to search for
 sequencing gaps:
 
     while ($seq =~ m/(N{20,})/g) {
-        push @gaps, JCVI::Range->ul(
+        push @gaps, Bio::Tiny::Range->ul(
             pos($seq),  # pos corresponds to upper bound of regular expression
             length($1)  # $1 is the stretch of Ns found
         );
@@ -176,10 +163,10 @@ sub new_ul {
 
 =head2 cast
 
-    my $range = JCVI::Range->cast( $range_like_object );
+    my $range = Bio::Tiny::Range->cast( $range_like_object );
 
 If another object implements the required lower/upper/strand methods defined by
-the JCVI::Range interface, you can cast it as a JCVI::Range object. Also, if
+the Bio::Tiny::Range interface, you can cast it as a Bio::Tiny::Range object. Also, if
 your range-like object implements the get_lus method (returning lower, upper
 and strand as an arrayref), then cast will use that method instead (useful for
 classes where getting this data requires computationally expensive
@@ -361,23 +348,22 @@ sub union {
 
 =head1 AUTHOR
 
-"Kevin Galinsky", C<< <"kgalinsk at jcvi.org"> >>
-
-=head1 BUGS
-
-Please report any bugs or feature requests through JIRA.
+Kevin Galinsky, C<"kgalinsky+cpan at gmail dot com">
 
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc JCVI::Range
+    perldoc Bio::Tiny::Range
 
 =head1 ACKNOWLEDGEMENTS
 
+J. Craig Venter Institute for allowing me to develop this module.
+Paolo Amedeo for his input when I was working on it.
+
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2009 "J. Craig Venter Institute", all rights reserved.
+Copyright (C) 2011 Kevin Galinsky, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

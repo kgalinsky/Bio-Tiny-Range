@@ -1,25 +1,12 @@
-# File: Base.pm
-# Author: kgalinsk
-# Created: Jul 13, 2009
-#
-# $Author$
-# $Date$
-# $Revision$
-# $HeadURL$
-#
-# Copyright 2009, J. Craig Venter Institute
-#
-# JCVI::Range::Base - base class for range objects
-
-package JCVI::Range::Base;
+package Bio::Tiny::Range::Base;
 
 use strict;
 use warnings;
 
 use base qw(
-  JCVI::Range::Base::Basic
-  JCVI::Range::Base::String
-  JCVI::Range::Base::Comparisons
+  Bio::Tiny::Range::Base::Basic
+  Bio::Tiny::Range::Base::String
+  Bio::Tiny::Range::Base::Comparisons
   );
 
 use Carp;
@@ -27,12 +14,12 @@ use Params::Validate qw(validate validate_pos validate_with);
 
 =head1 NAME
 
-JCVI::Range::Base - base class for range objects
+Bio::Tiny::Range::Base - base class for range objects
 
 =head1 SYNOPSIS
 
     package MyRange;
-    use base qw( JCVI::Range::Base );
+    use base qw( Bio::Tiny::Range::Base );
     ...
 
 =head1 DESCRIPTION

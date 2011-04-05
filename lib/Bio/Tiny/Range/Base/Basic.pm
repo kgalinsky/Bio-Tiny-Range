@@ -1,17 +1,4 @@
-# File: Basic.pm
-# Author: kgalinsk
-# Created: Jul 13, 2009
-#
-# $Author$
-# $Date$
-# $Revision$
-# $HeadURL$
-#
-# Copyright 2009, J. Craig Venter Institute
-#
-# JCVI::Range::Base::Basic - basic range functionality
-
-package JCVI::Range::Base::Basic;
+package Bio::Tiny::Range::Base::Basic;
 
 use strict;
 use warnings;
@@ -22,7 +9,7 @@ use Log::Log4perl qw(:easy);
 
 =head1 NAME
 
-JCVI::Range::Base::Basic - basic range functionality
+Bio::Tiny::Range::Base::Basic - basic range functionality
 
 =head1 SYNOPSIS
 
