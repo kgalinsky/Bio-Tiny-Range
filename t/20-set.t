@@ -5,8 +5,8 @@ use Test::More 'no_plan';
 use Bio::Tiny::Range::Set;
 use Bio::Tiny::Range;
 
-my @a = map { Bio::Tiny::Range->new( $_ * 20, 10, 1 ) }  ( 0, 1 );
-my @b = map { Bio::Tiny::Range->new( $_ * 20, 10, -1 ) } ( 1, 0 );
+my @a = map { Bio::Tiny::Range->new_lls( $_ * 20, 10, 1 ) }  ( 0, 1 );
+my @b = map { Bio::Tiny::Range->new_lls( $_ * 20, 10, -1 ) } ( 1, 0 );
 
 my ( $A, $B );
 
@@ -29,14 +29,4 @@ foreach my $def (@battery) {
 
     is( $A->$test, $pos, "+ $test correct" );
     is( $B->$test, $neg, "- $test correct" );
-}
-
-my $a = $A->simplify;
-my $b = $B->simplify;
-
-foreach my $def (@battery) {
-    my ( $test, $pos, $neg ) = @$def;
-
-    is( $a->$test, $pos, "+ $test bound correct" );
-    is( $b->$test, $neg, "- $test bound correct" );
 }

@@ -313,9 +313,8 @@ sub intersection {
 
     # Create a new object of the same class as self
     my $class = ref($self);
-    return $class->new( $lower, $length, $s1 )
-      if ( ( defined $s1 ) && ( defined $s2 ) && ( $s1 == $s2 ) );
-    return $class->new( $lower, $length );
+    return $class->new_lls( $lower, $length,
+        ( ( defined $s1 ) && ( defined $s2 ) && ( $s1 == $s2 ) ) ? $s1 : () );
 }
 
 =head2 union
@@ -343,9 +342,8 @@ sub union {
 
     # Create a new object of the same class as self
     my $class = ref($self);
-    return $class->new( $lower, $length, $s1 )
-      if ( ( defined $s1 ) && ( defined $s2 ) && ( $s1 == $s2 ) );
-    return $class->new( $lower, $length );
+    return $class->new_lls( $lower, $length,
+        ( ( defined $s1 ) && ( defined $s2 ) && ( $s1 == $s2 ) ) ? $s1 : () );
 }
 
 =head1 AUTHOR
