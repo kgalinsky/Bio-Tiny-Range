@@ -13,7 +13,7 @@ Bio::Tiny::Range::Base::Basic - basic range functionality
 
 =head1 SYNOPSIS
 
-    # You define these accessors/mutators
+    # The range interface expects these accessors/mutators
     $range->lower();
     $range->upper();
     $range->strand();
@@ -127,13 +127,13 @@ sub _end {
 
     # If strand isn't defined or 0:
     # Return the end if end5 = end3 (length == 1)
-    # Return undef (since we don't know which is which)
+    # Return nothing otherwise (since we don't know which is which)
     # Don't allow assignment
     my $strand = $self->strand;
     unless ($strand) {
         my $length = $self->length();
 
-        return undef unless ( ( defined $length ) && ( $length == 1 ) );
+        return unless ( ( defined $length ) && ( $length == 1 ) );
 
         return $self->lower + 1;
     }
@@ -186,36 +186,6 @@ sub sequence {
 
     my $substr = substr( $$seq_ref, $lower, $length );
     return \$substr;
-}
-
-=head2 extend
-
-    $self = $self->extend( $offset );             # Extend both ends by $offset
-    $self = $self->extend( $offset, $direction ); # Specify end to extend
-
-Extend/contract the range by the supplied offset in the specified direction. 
-The direction is -1, 0, 1, with -1 meaning to extend the lower bound, 0 to
-extend both range (default), and 1 to extend the upper bound. To contract,
-supply a negative offset.
-
-=cut
-
-sub extend {
-    my $self = shift;
-    my ( $offset, $direction ) = validate_pos(
-        @_,
-        { type => Params::Validate::SCALAR, regex => qr/^[+-]?\d+$/ },
-        {
-            default => 0,
-            type    => Params::Validate::SCALAR,
-            regex   => qr/^[+-]?[01]/
-        }
-    );
-
-    $self->lower( $self->lower - $offset ) unless ($direction == 1);
-    $self->upper( $self->upper + $offset ) unless ($direction == -1);
-
-    return $self;
 }
 
 1;
