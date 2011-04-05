@@ -60,34 +60,6 @@ These functions create new Bio::Tiny::Range objects
 
 =cut
 
-=head2 simplify
-
-    my $range = $set->simplify();
-
-Return a Bio::Tiny::Range object with the same endpoints and strand as the set.
-
-=cut
-
-sub simplify {
-    my $self = shift;
-    $self->_simplify( @_, $self->_ranges );
-}
-
-sub _simplify {
-    my $self   = shift;
-    my $range = pop;
-
-    return undef unless (@$range);
-
-    my $lower  = $self->_lower($range);
-    my $upper  = $self->_upper($range);
-    my $strand = $self->_strand($range);
-
-    my $length = $upper - $lower;
-
-    return Bio::Tiny::Range->new( $lower, $length, $strand );
-}
-
 =head2 introns
 
     my $introns = $set->introns();
