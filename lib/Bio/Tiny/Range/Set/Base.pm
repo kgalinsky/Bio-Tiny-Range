@@ -12,10 +12,8 @@ Bio::Tiny::Range::Set::Base - base class for sets of range
 use base qw( Bio::Tiny::Range::Base );
 
 use Carp;
-use List::Util qw(min max sum);
+use List::Util qw(min max sum reduce);
 use Params::Validate;
-
-use Bio::Tiny::Range;
 
 =head1 ABSTRACT METHODS
 
@@ -54,113 +52,11 @@ won't affect the actual data structure of the set.
 
 sub ranges { [ @{ shift->_ranges() } ] }
 
-=head1 BOUNDS MAKERS
+=head1 RANGE INTERFACE METHODS
 
-These functions create new Bio::Tiny::Range objects
-
-=cut
-
-=head2 introns
-
-    my $introns = $set->introns();
-
-Return an arrayref set of range which are the introns.
+Fill in Bio::Tiny::Range::Base's abstract methods given _ranges.
 
 =cut
-
-sub introns {
-    my $self   = shift;
-    my $range = $self->_ranges();
-
-    return undef unless (@$range);
-
-    @$range = sort { $a <=> $b } @$range;
-
-    my $introns = [];
-
-    my $a = $range->[0];
-    for ( my $i = 1 ; $i < @$range ; $i++ ) {
-        $b = $range->[$i];
-        push @$introns, Bio::Tiny::Range->new_lus( $a->upper, $b->lower );
-        $a = $b;
-    }
-
-    return $introns;
-}
-
-=head1 BOUNDS-LIKE METHODS
-
-These are the methods that allow many of the same functions as range uses to
-run.
-
-=cut
-
-=head2 strand
-
-    my $strand = $set->strand();
-
-Returns the strand.
-
-=cut
-
-sub strand {
-    my $self = shift;
-    $self->_strand( @_, $self->_ranges );
-}
-
-sub _strand {
-    my $self   = shift;
-    my $range = pop;
-
-    return undef unless ( defined($range) && (@$range) );
-
-    # Set range
-    if (@_) {
-        foreach my $bound (@$range) {
-            $bound->strand(@_);
-        }
-        return @_;
-    }
-
-    # Array containing range to normalize
-    my @normalize;
-
-    # Seed strand
-    my $strand = $range->[0]->strand;
-    push @normalize, $range->[0] unless ($strand);
-
-    for ( my $i = 1 ; $i < @$range ; $i++ ) {
-        my $current = $range->[$i]->strand;
-
-        # Where strand = +/-1 (not undef or 0)
-        if ($strand) {
-            if ($current) {
-
-                # Return undef if two adjacent features are on opposite strands
-                # This means that one feature has strand == 1, and the other
-                # has strand == -1. A quick/easy test is to see if the product
-                # of the two strands is -1
-                return undef if ( $strand * $current == -1 );
-            }
-
-            else { push @normalize, $range->[$i] }
-
-            next;
-        }
-
-        # Assign current to strand for cases where strand isn't +/-1
-        $strand = $current if ( defined $current );
-    }
-
-    # Set the strand of range whose strands are 0/undef where others are known
-    if ($strand) {
-        foreach my $bound (@normalize) {
-            $bound->strand($strand);
-        }
-    }
-
-    return $strand;
-}
 
 =head2 lower
 
@@ -176,7 +72,7 @@ sub lower {
 }
 
 sub _lower {
-    my $self   = shift;
+    my $self  = shift;
     my $range = pop;
 
     # Get the lowest bound and return it unless we were given an new one
@@ -204,7 +100,7 @@ sub upper {
 }
 
 sub _upper {
-    my $self   = shift;
+    my $self  = shift;
     my $range = pop;
 
     # Get the highest bound and return it unless we were given an new one
@@ -216,6 +112,72 @@ sub _upper {
     foreach my $bound ( grep { $_->upper == $highest } @$range ) {
         $bound->upper(@_);
     }
+}
+
+=head2 strand
+
+    my $strand = $set->strand();
+
+Returns the strand.
+
+=cut
+
+sub strand {
+    my $self = shift;
+    $self->_strand( @_, $self->_ranges );
+}
+
+sub _strand {
+    my $self = shift;
+    my ($ranges) = @_;
+
+    return undef unless ( defined($ranges) && (@$ranges) );
+
+    # Set ranges
+    if (@_) {
+        foreach my $range (@$ranges) {
+            $range->strand(@_);
+        }
+        return @_;
+    }
+
+    # Array containing range to normalize
+    my @normalize;
+
+    # Seed strand
+    my $strand = $ranges->[0]->strand;
+    push @normalize, $ranges->[0] unless ($strand);
+
+    for ( my $i = 1 ; $i < @$ranges ; $i++ ) {
+        my $current = $ranges->[$i]->strand;
+
+        # Where strand = +/-1 (not undef or 0)
+        if ($strand) {
+            if ($current) {
+
+                # Return undef if two adjacent features are on opposite strands
+                # This means that one feature has strand == 1, and the other
+                # has strand == -1. A quick/easy test is to see if the product
+                # of the two strands is -1
+                return undef if ( $strand * $current == -1 );
+            }
+
+            else { push @normalize, $ranges->[$i] }
+
+            next;
+        }
+
+        # Assign current to strand for cases where strand isn't +/-1
+        $strand = $current if ( defined $current );
+    }
+
+    # Set the strand of ranges whose strands are 0/undef where others are known
+    if ($strand) {
+        foreach my $range (@normalize) {
+            $range->strand($strand);
+        }
+    }
+    return $strand;
 }
 
 =head1 ADAPTED METHODS
@@ -237,7 +199,7 @@ sub spliced_sequence {
 }
 
 sub _spliced_sequence {
-    my $self   = shift;
+    my $self  = shift;
     my $range = pop;
 
     return undef unless (@$range);
@@ -259,7 +221,7 @@ sub spliced_length {
 }
 
 sub _spliced_length {
-    my $self   = shift;
+    my $self  = shift;
     my $range = pop;
 
     return undef unless (@$range);
