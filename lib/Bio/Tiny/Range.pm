@@ -165,12 +165,12 @@ sub new_ul {
 
     my $range = Bio::Tiny::Range->cast( $range_like_object );
 
-If another object implements the required lower/upper/strand methods defined by
-the Bio::Tiny::Range interface, you can cast it as a Bio::Tiny::Range object. Also, if
-your range-like object implements the get_lus method (returning lower, upper
-and strand as an arrayref), then cast will use that method instead (useful for
-classes where getting this data requires computationally expensive
-initialization that can be shared among the different methods).
+If another object implements lower/upper/strand methods, then you can cast it
+as a Bio::Tiny::Range object. Also, if your range-like object implements the
+get_lus method (returning lower, upper and strand as an arrayref), then cast
+will use that method instead. This is useful for classes where getting
+coordinate data has a computationally expensive initialization that can be
+shared among the different methods.
 
 =cut
 
@@ -178,9 +178,9 @@ sub cast {
     my $class = shift;
     my ($object) = validate_pos( @_, { can => [qw( lower upper strand )] } );
 
-    return $class->new_lus( @{ $object->get_lus } )
-      if ( $object->can('get_lus') );
-    return $class->new_lus( map { $object->$_ } qw( lower upper strand ) );
+    return $object->can('get_lus')
+      ? $class->new_lus( @{ $object->get_lus } )
+      : $class->new_lus( map { $object->$_ } qw/ lower upper strand / );
 }
 
 =head1 ACCESSORS
