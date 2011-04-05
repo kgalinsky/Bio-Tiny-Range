@@ -8,7 +8,6 @@ use Log::Log4perl qw(:easy);
 
 use overload
   'cmp'    => \&compare,
-  '<=>'    => \&compare,
   'eq'     => \&equal,
   '=='     => \&equal,
   fallback => 1;
@@ -46,11 +45,10 @@ our @LUS = qw(lower upper strand);
 =head2 compare
 
     my @sorted = sort { $a->compare($b) } @ranges;
-    my @sorted = sort { $a <=> $b } @ranges;
 	my @sorted = sort { $a cmp $b } @ranges;
 	my @sorted = sort @ranges;
 	
-	my @filtered = grep { $_ < $coordinate } @ranges
+	my @filtered = grep { $_ lt $coordinate } @ranges
 
 Range comparator. Returns -1, 0 or 1 depending upon the relative position of
 two ranges or a range and a coordinate. Ranges are ordered based upon lower
