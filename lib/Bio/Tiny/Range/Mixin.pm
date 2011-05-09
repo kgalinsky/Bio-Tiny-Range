@@ -156,7 +156,7 @@ sub length {
 
 =head2 sequence
 
-    $sub_ref = $range->sequence($seq_ref);
+    my $sub_ref = $range->sequence($seq_ref);
 
 Extract substring from a sequence reference. Returned as a reference. The same
 as:
@@ -195,11 +195,16 @@ sub sequence {
 
 =head2 consensus_strand
 
+    my $strand = $range->consensus_strand(@ranges);
+    my $strand = Bio::Tiny::Range::Mixin->consensus_strand(@ranges);
+
 =cut
 
 sub consensus_strand {
+    shift unless ( ref $_[0] );
     reduce { defined($a) && defined($b) && $a == $b ? $a : () }
-    map { $_->strand } @_;
+    map { $_->strand }
+      validate_pos( @_, ( { can => ['strand'] } ) x @_ );
 }
 
 =head1 1-BASED CONVERSION
