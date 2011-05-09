@@ -24,22 +24,23 @@ foreach my $test (@TESTS) {
     my ( $range1, $range2, $intersection, $union ) =
       map { $_ ? Bio::Tiny::Range->new_lus(@$_) : $_ } @$test;
     is_deeply(
-        $range1->intersection($range2),
+        $range1->intersection($range2) || undef,
         $intersection,
         sprintf(
             'intersection of %s, %s == %s',
             $range1, $range2, ( $intersection ? $intersection : 'undef' )
         )
     );
-    is_deeply( $range2->intersection($range1),
+    is_deeply( $range2->intersection($range1) || undef,
         $intersection, 'converse of previous test' );
     is_deeply(
-        $range1->union($range2),
+        $range1->union($range2) || undef,
         $union,
         sprintf(
             'union of        %s, %s == %s',
             $range1, $range2, ( $union ? $union : 'undef' )
         )
     );
-    is_deeply( $range2->union($range1), $union, 'converse of previous test' );
+    is_deeply( $range2->union($range1) || undef,
+        $union, 'converse of previous test' );
 }

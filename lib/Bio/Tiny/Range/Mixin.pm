@@ -61,10 +61,29 @@ abstract methods required by those methods.
 
 =cut
 
-# Variables used for validations
 use Params::Validate;
+
+# Variables used for validations
 our @LU  = qw/lower upper/;
 our @LUS = qw/lower upper strand/;
+
+our $NON_NEG_INT_REGEX = qr/^\d+$/;
+our $POS_INT_REGEX     = qr/^[1-9]\d*$/;
+our $STRAND_REGEX      = qr/^([+-]?[01]|)$/;
+
+our $NON_NEG_INT_VAL = {
+    type  => Params::Validate::SCALAR,
+    regex => $NON_NEG_INT_REGEX
+};
+our $POS_INT_VAL = {
+    type  => Params::Validate::SCALAR,
+    regex => $POS_INT_REGEX
+};
+our $STRAND_VAL = {
+    optional => 1,
+    type     => Params::Validate::UNDEF | Params::Validate::SCALAR,
+    regex    => $STRAND_REGEX
+};
 
 use overload
   'cmp'    => \&compare,
@@ -356,7 +375,7 @@ sub equal {
     return 1;
 }
 
-=head2 overlap
+=head2 overlaps
 
     my $bool = $a->overlaps($b);
 
@@ -386,6 +405,8 @@ constructor in your class.
 sub union {
     my $self = shift;
     my ($range) = validate_pos( @_, { can => \@LUS }, 0 );
+
+    return unless ( $self->overlaps($range) );
 
     ref($self)->new_lus(
         min( map { $_->lower } ( $self, $range ) ),

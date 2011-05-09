@@ -3,13 +3,13 @@ package Bio::Tiny::Range;
 use strict;
 use warnings;
 
-use base qw( Bio::Tiny::Range::Base );
+use base qw( Bio::Tiny::Range::Base Bio::Tiny::Range::Mixin );
 
 use Carp;
 use List::Util qw( min max );
 use Params::Validate;
 
-use version; our $VERSION = qv('0.5.4');
+use version; our $VERSION = qv('0.6.0');
 
 =head1 NAME
 
@@ -17,7 +17,7 @@ Bio::Tiny::Range - class for ranges on genetic sequence data
 
 =head1 VERSION
 
-Version 0.5.4
+Version 0.6.0
 
 =head1 SYNOPSIS
 
@@ -68,10 +68,6 @@ my $LOWER_INDEX  = 0;
 my $LENGTH_INDEX = 1;
 my $STRAND_INDEX = 2;
 
-our $NON_NEG_INT_REGEX = qr/^\d+$/;
-our $POS_INT_REGEX     = qr/^[1-9]\d*$/;
-our $STRAND_REGEX      = qr/^[+-]?[01]$/;
-
 =head1 CONSTRUCTORS
 
 =cut
@@ -93,8 +89,16 @@ sub new_lls {
     my $self  = [
         validate_pos(
             @_,
-            ( { default => 0, regex => $NON_NEG_INT_REGEX } ) x 2,
-            { default => undef, regex => $STRAND_REGEX }
+            (
+                {
+                    default => 0,
+                    regex   => $Bio::Tiny::Range::Mixin::NON_NEG_INT_REGEX
+                }
+              ) x 2,
+            {
+                default => undef,
+                regex   => $Bio::Tiny::Range::Mixin::STRAND_REGEX
+            }
         )
     ];
     bless $self, $class;
@@ -110,7 +114,8 @@ Create the class given 5' and 3' end coordinates.
 
 sub new_53 {
     my $class = shift;
-    my ( $e5, $e3 ) = validate_pos( @_, ( { regex => $POS_INT_REGEX } ) x 2 );
+    my ( $e5, $e3 ) =
+      validate_pos( @_, ($Bio::Tiny::Range::Mixin::POS_INT_VAL) x 2 );
 
     return bless( [ --$e5, $e3 - $e5, 1 ],  $class ) if ( $e5 < $e3 );
     return bless( [ --$e3, $e5 - $e3, -1 ], $class ) if ( $e3 < $e5 );
@@ -122,7 +127,7 @@ sub new_53 {
     my $range = Bio::Tiny::Range->new_lus( $lower, $upper );
     my $range = Bio::Tiny::Range->new_lus( $lower, $upper, $strand );
 
-Create the class given lower and upper range, and possibly strand.
+Create the class given lower and upper bounds, and optionally a strand.
 
 =cut
 
@@ -130,8 +135,8 @@ sub new_lus {
     my $class = shift;
     my ( $lower, $upper, $strand ) = validate_pos(
         @_,
-        ( { regex => $NON_NEG_INT_REGEX } ) x 2,
-        { optional => 1, regex => $STRAND_REGEX }
+        ($Bio::Tiny::Range::Mixin::NON_NEG_INT_VAL) x 2,
+        $Bio::Tiny::Range::Mixin::STRAND_VAL
     );
 
     my $length = $upper - $lower;
@@ -140,9 +145,10 @@ sub new_lus {
     return bless( [ $lower, $length, $strand ], $class );
 }
 
-=head2 new_ul
+=head2 new_uls
 
     my $range = Bio::Tiny::Range->new_ul($upper, $length);
+    my $range = Bio::Tiny::Range->new_ul($upper, $length, $strand);
 
 Specify upper and length. Useful when using a regular expression to search for
 sequencing gaps:
@@ -156,15 +162,18 @@ sequencing gaps:
 
 =cut
 
-sub new_ul {
+sub new_uls {
     my $class = shift;
-    my ( $upper, $length ) =
-      validate_pos( @_, ( { regex => $NON_NEG_INT_REGEX } ) x 2 );
+    my ( $upper, $length, $strand ) = validate_pos(
+        @_,
+        ($Bio::Tiny::Range::Mixin::NON_NEG_INT_VAL) x 2,
+        $Bio::Tiny::Range::Mixin::STRAND_VAL
+    );
 
     my $lower = $upper - $length;
     croak 'Upper bound must be greater than length' unless ( $lower >= 0 );
 
-    return bless( [ $lower, $length ], $class );
+    return bless( [ $lower, $length, $strand ], $class );
 }
 
 =head2 cast
@@ -182,11 +191,13 @@ shared among the different methods.
 
 sub cast {
     my $class = shift;
-    my ($object) = validate_pos( @_, { can => [qw( lower upper strand )] } );
+    my ($range) = validate_pos( @_, { can => [qw( lower upper strand )] } );
 
-    return $object->can('get_lus')
-      ? $class->new_lus( @{ $object->get_lus } )
-      : $class->new_lus( map { $object->$_ } qw/ lower upper strand / );
+    return $class->new_lus(
+        $range->can('get_lus')
+        ? @{ $range->get_lus }
+        : map { $range->$_ } qw/ lower upper strand /
+    );
 }
 
 =head1 ACCESSORS
@@ -208,7 +219,7 @@ sub lower {
 
     # Validate the lower bound
     croak 'Lower bound must be a non-negative integer'
-      unless ( $_[0] =~ /$NON_NEG_INT_REGEX/ );
+      unless ( $_[0] =~ /$Bio::Tiny::Range::Mixin::NON_NEG_INT_REGEX/ );
 
     # Adjust the length and lower bound
     $self->_set_length( $self->upper() - $_[0] );
@@ -252,7 +263,7 @@ sub _set_length {
 
     # Validate the length
     croak 'Length must be a non-negative integer'
-      unless ( $_[0] =~ /$NON_NEG_INT_REGEX/ );
+      unless ( $_[0] =~ /$Bio::Tiny::Range::Mixin::NON_NEG_INT_REGEX/ );
 
     return $self->[$LENGTH_INDEX] = $_[0] * 1;
 }
@@ -265,9 +276,9 @@ sub _set_length {
 Get/set the strand. Strand may be undef, 0, 1, or -1. Here are the meanings of
 the four values:
 
-    1   - "+" strand
-    -1  - "-" strand
-    0   - strandless
+    1     - "+" strand
+    -1    - "-" strand
+    0     - strandless
     undef - unknown
 
 =cut
@@ -282,72 +293,8 @@ sub strand {
 
     # Validate strand
     croak 'Value passed to strand must be undef, 0, 1, or -1'
-      unless ( $_[0] =~ /$STRAND_REGEX/ );
+      unless ( $_[0] =~ /$Bio::Tiny::Range::Mixin::STRAND_REGEX/ );
     return $self->[$STRAND_INDEX] = $_[0] * 1;
-}
-
-=head1 COMBINATION METHODS
-
-Returns a new range given two ranges
-
-=cut
-
-=head2 intersection
-
-    my $range = $a->intersection($b);
-
-Returns the intersection of two ranges. If they don't overlap, return undef.
-
-=cut
-
-sub intersection {
-    my $self = shift;
-
-    my ($range) = validate_pos( @_, { can => [qw( lower upper strand )] } );
-
-    return undef unless ( $self->overlap($range) );
-
-    # Get endpoints of intersection
-    my $lower = max( map { $_->lower } $self, $range );
-    my $upper = min( map { $_->upper } $self, $range );
-    my $length = $upper - $lower;
-
-    # Get strands for comparison
-    my ( $s1, $s2 ) = map { $_->strand } $self, $range;
-
-    # Create a new object of the same class as self
-    my $class = ref($self);
-    return $class->new_lls( $lower, $length,
-        ( ( defined $s1 ) && ( defined $s2 ) && ( $s1 == $s2 ) ) ? $s1 : () );
-}
-
-=head2 union
-
-    my $range = $a->union($b);
-
-Returns the union of two ranges. If they don't overlap, return undef.
-
-=cut
-
-sub union {
-    my $self = shift;
-
-    my ($range) = validate_pos( @_, { can => [qw( lower upper strand )] } );
-
-    return undef unless ( $self->overlap($range) );
-
-    # Get endpoints of intersection
-    my $lower = min( map { $_->lower } $self, $range );
-    my $upper = max( map { $_->upper } $self, $range );
-    my $length = $upper - $lower;
-
-    # Get strands for comparison
-    my ( $s1, $s2 ) = map { $_->strand } $self, $range;
-
-    # Create a new object of the same class as self
-    my $class = ref($self);
-    return $class->new_lls( $lower, $length,
-        ( ( defined $s1 ) && ( defined $s2 ) && ( $s1 == $s2 ) ) ? $s1 : () );
 }
 
 =head1 AUTHOR
