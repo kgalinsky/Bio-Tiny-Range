@@ -23,22 +23,26 @@ Version 0.5.4
 
     my $range = Bio::Tiny::Range->new_53( 52, 143 );
 
-    # get the coordinates
+    # get coordinates
     my $lower  = $range->lower;  # 51
     my $upper  = $range->upper;  # 143
     my $strand = $range->strand; # 1
     my $length = $range->length; # 92
 
-    my $seq_ref = $range->sequence(\$sequence); 
-
-    # get set coordinate information
+    # set coordinates
     $range->lower(86);
     $range->upper(134);
     $range->strand(-1);
-    
-    my $end5 = $range->end5;     # 134
-    my $end3 = $range->end3;     # 87
-    
+
+    # alternate coordinates
+    my $start = $range->start;    # 87
+    my $end   = $renge->end;      # 134 - same as "upper"
+    my $end5  = $range->end5;     # 134
+    my $end3  = $range->end3;     # 87
+
+    # methods
+    my $seq_ref = $range->sequence(\$sequence); 
+
 =head1 DESCRIPTION
 
 Store boundary information. Convert from interbase to end5/end3. Compute useful
@@ -117,7 +121,7 @@ sub new_53 {
 
     my $range = Bio::Tiny::Range->new_lus( $lower, $upper );
     my $range = Bio::Tiny::Range->new_lus( $lower, $upper, $strand );
-    
+
 Create the class given lower and upper range, and possibly strand.
 
 =cut

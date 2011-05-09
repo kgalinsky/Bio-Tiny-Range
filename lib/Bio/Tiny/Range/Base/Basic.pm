@@ -44,7 +44,7 @@ These accessors/mutators must be defined in your class.
     my $lower = $range->lower();
     $range->lower($lower);
 
-Get/set lower bound. 
+Get/set lower bound.
 
 =head2 upper
 
@@ -64,7 +64,7 @@ Get/set strand.
 
 =head1 PUBLIC METHODS
 
-These are mixins that require the abstract methods to function
+These are mixins that require the abstract methods to function.
 
 =cut
 
@@ -72,7 +72,7 @@ These are mixins that require the abstract methods to function
 
     my $length = $range->length();
 
-Return distance between upper and lower range.
+Return distance between upper and lower bound.
 
 =cut
 
@@ -87,12 +87,33 @@ sub length {
     return $upper - $lower;
 }
 
+=head1 INTERBASE/1-BASED CONVERSION
+
+Storing interbase coordinates makes sense for a variety of reasons: they can
+be stored eventually as unsigned integers, calculating length is easier, you
+can specify 0-width ranges, strings are indexed starting at 0 in perl. However,
+most biologist understand 1-based coordinates, so the following functions
+perform those transformations.
+
+=head2 start
+
+    $start = $range->start();
+    $range->start($start);
+
+=head2 end
+
+    $end = $range->end();
+    $range->end($end);
+
+=cut
+
+sub start { @_ > 1 ? $_[0]->lower( $_[1] - 1 ) + 1 : $_[0]->lower + 1 }
+sub end { shift->upper(@_) }
+
 =head1 5'/3' END CONVERSION
 
 A range object should keep track of upper/lower and strand in some form. The
 following methods convert between those values and ends.
-
-=cut
 
 =head2 end5
 
@@ -100,10 +121,6 @@ following methods convert between those values and ends.
     $range->end5($end5);
 
 Get/set 5' end
-
-=cut
-
-sub end5 { shift->_end( 1, @_ ) }
 
 =head2 end3
 
@@ -114,17 +131,16 @@ Get/set 3' end
 
 =cut
 
-sub end3 { shift->_end( -1, @_ ) }
+sub end5 { shift->_end53( 1,  @_ ) }
+sub end3 { shift->_end53( -1, @_ ) }
 
-# Does the actual work of figuring out the end
-sub _end {
+# Does the actual work of figuring out 5'/3' end
+sub _end53 {
     my $self = shift;
 
-    # $test is "On what strand does this end correspond to the lower bound?"
+    # $test is "On what strand does this end correspond to the start?"
     my $test = shift;
-
-    my ($end) = validate_pos( @_, { regex => qr/^\d+$/, optional => 1 } );
-
+    
     # If strand isn't defined or 0:
     # Return the end if end5 = end3 (length == 1)
     # Return nothing otherwise (since we don't know which is which)
@@ -135,16 +151,14 @@ sub _end {
 
         return unless ( ( defined $length ) && ( $length == 1 ) );
 
-        return $self->lower + 1;
+        return $self->start;
     }
 
     # Get the bound based upon the test
-    # For lower range, we want to offset the bound by 1
-    my ( $bound, $offset ) = $strand == $test ? ( 'lower', 1 ) : ( 'upper', 0 );
+    my $bound = $strand == $test ? 'start' : 'end';
 
     # Return/set the bound
-    return $self->$bound() + $offset unless ( defined $end );
-    return $self->$bound( $end - $offset ) + $offset;
+    return $self->$bound(@_);
 }
 
 =head2 sequence
