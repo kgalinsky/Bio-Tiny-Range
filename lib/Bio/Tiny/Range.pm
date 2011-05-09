@@ -362,7 +362,7 @@ You can find documentation for this module with the perldoc command.
 
 =head1 ACKNOWLEDGEMENTS
 
-J. Craig Venter Institute for allowing me to develop this module.
+J. Craig Venter Institute for allowing me to initially develop this module.
 Paolo Amedeo for his input when I was working on it.
 
 =head1 COPYRIGHT & LICENSE
