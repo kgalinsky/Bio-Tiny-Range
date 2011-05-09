@@ -3,7 +3,7 @@ package Bio::Tiny::Range;
 use strict;
 use warnings;
 
-use base qw( Bio::Tiny::Range::Base Bio::Tiny::Range::Mixin );
+use base 'Bio::Tiny::Range::Mixin';
 
 use Carp;
 use List::Util qw( min max );

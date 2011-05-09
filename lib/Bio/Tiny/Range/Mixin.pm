@@ -54,6 +54,12 @@ Bio::Tiny::Range::Mixin - mixins to provide range functionality
 
     $range->sequence(\$sequence);
 
+    # display methods
+    print $range;
+    print $range->as_string;
+    print $range->as_string_lus;
+    print $range->as_string_53;
+
 =head1 DESCRIPTION
 
 This class provides additional range functionality if your class defines the
@@ -92,6 +98,7 @@ use overload
   '>='     => \&contains,
   '<='     => \&inside,
   '+'      => \&union,
+  '""'     => \&as_string,
   fallback => 1;
 
 use List::Util qw/ min max reduce /;
@@ -203,8 +210,7 @@ sub sequence {
 sub consensus_strand {
     shift unless ( ref $_[0] );
     reduce { defined($a) && defined($b) && $a == $b ? $a : () }
-    map { $_->strand }
-      validate_pos( @_, ( { can => ['strand'] } ) x @_ );
+    map { $_->strand } validate_pos( @_, ( { can => ['strand'] } ) x @_ );
 }
 
 =head1 1-BASED CONVERSION
@@ -438,6 +444,70 @@ sub intersection {
     return $lower < $upper
       ? ref($self)->new_lus( $lower, $upper, $self->consensus_strand($range) )
       : ();
+}
+
+=head1 DISPLAY METHODS
+
+    print $range, "\n";
+
+These methods stringify your range for easy display in your scripts. They
+aren't meant for use as IO methods.
+
+=cut
+
+{
+    no warnings;
+    *as_string = \&as_string_lus;
+}
+
+=head2 as_string_lus
+
+    $self->as_string_lus();
+
+Prints the object as [ $lower $upper $strand ]. Pads the output, so it will
+look like:
+
+    [ l           u s ]
+    [ ll         uu s ]
+    [ llllll uuuuuu s ]
+
+=cut
+
+sub as_string_lus {
+    sprintf '[ %-6d %6d %s ]', map { $_[0]->$_ } qw/ lower upper strand_str /;
+}
+
+=head2 as_string_53
+
+    $self->as_string_53();
+
+Prints the object as <5' $end5 $end3 3'>. Pads the output, so it will look
+like:
+
+    <5' 5           3 3'>
+    <5' 55         33 3'>
+    <5' 555555 333333 3'>
+
+=cut
+
+sub as_string_53 {
+    sprintf q{<5' %-6d %6d 3'>},  map { $_[0]->$_ } ( qw/ end5 end3 / );
+}
+
+=head2 strand_str
+
+    my $strand_str = $range->strand_str;
+
+Converts strand info to "+", "-", "." or "?".
+
+=cut
+
+# Map from (0, 1, -1) to (. + -)
+our @STRAND_MAP = qw( . + - );
+
+sub strand_str {
+    my $strand = $_[0]->strand;
+    defined($strand) ? $STRAND_MAP[$strand] : '?';
 }
 
 1;
