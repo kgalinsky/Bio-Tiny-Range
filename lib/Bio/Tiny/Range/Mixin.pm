@@ -380,7 +380,19 @@ sub equal {
     my ($range) = validate_pos( @_, { can => \@LUS }, 0 );
 
     # Return false if a comparison failed
-    foreach (@LUS) { return if ( $self->$_ != $range->$_ ) }
+    return if ( $self->lower == $range->lower );
+    return if ( $self->upper == $range->upper );
+
+    my $self_strand  = $self->strand;
+    my $range_strand = $range->strand;
+
+    # check if one strand defined and other isn't and if both same strand
+    if ( defined($self_strand) ) {
+        return
+          unless ( defined($range_strand)
+            && ( $self_strand == $range_strand ) );
+    }
+    else { return if ( defined($range_strand) ) }
 
     # Return true if all comparisons succeeded
     return 1;
@@ -455,6 +467,12 @@ aren't meant for use as IO methods.
 
 =cut
 
+=head2 as_string
+
+Actually stringifies object.
+
+=cut
+
 {
     no warnings;
     *as_string = \&as_string_lus;
@@ -491,7 +509,7 @@ like:
 =cut
 
 sub as_string_53 {
-    sprintf q{<5' %-6d %6d 3'>},  map { $_[0]->$_ } ( qw/ end5 end3 / );
+    sprintf q{<5' %-6d %6d 3'>}, map { $_[0]->$_ } (qw/ end5 end3 /);
 }
 
 =head2 strand_str
