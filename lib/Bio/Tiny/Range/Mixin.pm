@@ -492,7 +492,7 @@ look like:
 =cut
 
 sub as_string_lus {
-    sprintf '[ %-6d %6d %s ]', map { $_[0]->$_ } qw/ lower upper strand_str /;
+    sprintf '[ %-6d %6d %s ]', $_[0]->lower, $_[0]->upper, $_[0]->strand_str;
 }
 
 =head2 as_string_53
@@ -509,8 +509,9 @@ like:
 =cut
 
 sub as_string_53 {
-    sprintf q{<5' %-6d %6d 3'>}, map { $_[0]->$_ } (qw/ end5 end3 /);
+    sprintf q{<5' %-6d %6d 3'>}, $_[0]->end5, $_[0]->end3;
 }
+
 
 =head2 strand_str
 
