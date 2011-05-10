@@ -128,7 +128,7 @@ sub strand {
 }
 
 sub _strand {
-    my $self = shift;
+    my $self   = shift;
     my $ranges = pop(@_);
 
     return undef unless ( defined($ranges) && (@$ranges) );
@@ -152,6 +152,7 @@ sub _strand {
         my $b_str = $b->strand;
 
         if ( !$b_str ) {
+
             # Normalize strand for ranges where strand isn't +/-1
             push @normalize, $b;
             $a;
@@ -168,7 +169,8 @@ sub _strand {
                 $a;
             }
         }
-    }   ( $strand, @$ranges[ 1 .. $#$ranges ] );
+    }
+    ( $strand, @$ranges[ 1 .. $#$ranges ] );
 
     # Set strands for unstranded ranges if some were stranded
     if ($strand) {
@@ -227,6 +229,17 @@ sub _spliced_length {
     return undef unless (@$range);
 
     return sum map { $_->length } @$range;
+}
+
+=head2 as_string
+
+=cut
+
+{
+    no warnings;
+    *as_string = *_as_string = sub {
+        '[' . join( ',', map { $_->_as_string } @{ $_[0]->_ranges } ) . ']';
+    };
 }
 
 1;

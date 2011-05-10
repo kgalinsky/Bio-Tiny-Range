@@ -1,4 +1,4 @@
-package Bio::Tiny::Range::Mixin;
+package Bio::Tiny::Range::Base;
 
 use strict;
 use warnings;
@@ -7,7 +7,7 @@ use Carp;
 
 =head1 NAME
 
-Bio::Tiny::Range::Mixin - mixins to provide range functionality
+Bio::Tiny::Range::Base - mixins to provide range functionality
 
 =head1 SYNOPSIS
 
@@ -19,7 +19,7 @@ Bio::Tiny::Range::Mixin - mixins to provide range functionality
     sub strand { ... }
     sub new_lus { ... }
 
-    our @ISA = 'Bio::Tiny::Range::Mixin'
+    our @ISA = 'Bio::Tiny::Range::Base'
 
     1;
 
@@ -203,7 +203,7 @@ sub sequence {
 =head2 consensus_strand
 
     my $strand = $range->consensus_strand(@ranges);
-    my $strand = Bio::Tiny::Range::Mixin->consensus_strand(@ranges);
+    my $strand = Bio::Tiny::Range::Base->consensus_strand(@ranges);
 
 =cut
 

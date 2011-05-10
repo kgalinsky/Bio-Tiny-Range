@@ -3,7 +3,7 @@ package Bio::Tiny::Range;
 use strict;
 use warnings;
 
-use base 'Bio::Tiny::Range::Mixin';
+use base 'Bio::Tiny::Range::Base';
 
 use Carp;
 use List::Util qw( min max );
@@ -92,12 +92,12 @@ sub new_lls {
             (
                 {
                     default => 0,
-                    regex   => $Bio::Tiny::Range::Mixin::NON_NEG_INT_REGEX
+                    regex   => $Bio::Tiny::Range::Base::NON_NEG_INT_REGEX
                 }
               ) x 2,
             {
                 default => undef,
-                regex   => $Bio::Tiny::Range::Mixin::STRAND_REGEX
+                regex   => $Bio::Tiny::Range::Base::STRAND_REGEX
             }
         )
     ];
@@ -115,7 +115,7 @@ Create the class given 5' and 3' end coordinates.
 sub new_53 {
     my $class = shift;
     my ( $e5, $e3 ) =
-      validate_pos( @_, ($Bio::Tiny::Range::Mixin::POS_INT_VAL) x 2 );
+      validate_pos( @_, ($Bio::Tiny::Range::Base::POS_INT_VAL) x 2 );
 
     return bless( [ --$e5, $e3 - $e5, 1 ],  $class ) if ( $e5 < $e3 );
     return bless( [ --$e3, $e5 - $e3, -1 ], $class ) if ( $e3 < $e5 );
@@ -135,8 +135,8 @@ sub new_lus {
     my $class = shift;
     my ( $lower, $upper, $strand ) = validate_pos(
         @_,
-        ($Bio::Tiny::Range::Mixin::NON_NEG_INT_VAL) x 2,
-        $Bio::Tiny::Range::Mixin::STRAND_VAL
+        ($Bio::Tiny::Range::Base::NON_NEG_INT_VAL) x 2,
+        $Bio::Tiny::Range::Base::STRAND_VAL
     );
 
     my $length = $upper - $lower;
@@ -166,8 +166,8 @@ sub new_uls {
     my $class = shift;
     my ( $upper, $length, $strand ) = validate_pos(
         @_,
-        ($Bio::Tiny::Range::Mixin::NON_NEG_INT_VAL) x 2,
-        $Bio::Tiny::Range::Mixin::STRAND_VAL
+        ($Bio::Tiny::Range::Base::NON_NEG_INT_VAL) x 2,
+        $Bio::Tiny::Range::Base::STRAND_VAL
     );
 
     my $lower = $upper - $length;
@@ -219,7 +219,7 @@ sub lower {
 
     # Validate the lower bound
     croak 'Lower bound must be a non-negative integer'
-      unless ( $_[0] =~ /$Bio::Tiny::Range::Mixin::NON_NEG_INT_REGEX/ );
+      unless ( $_[0] =~ /$Bio::Tiny::Range::Base::NON_NEG_INT_REGEX/ );
 
     # Adjust the length and lower bound
     $self->_set_length( $self->upper() - $_[0] );
@@ -263,7 +263,7 @@ sub _set_length {
 
     # Validate the length
     croak 'Length must be a non-negative integer'
-      unless ( $_[0] =~ /$Bio::Tiny::Range::Mixin::NON_NEG_INT_REGEX/ );
+      unless ( $_[0] =~ /$Bio::Tiny::Range::Base::NON_NEG_INT_REGEX/ );
 
     return $self->[$LENGTH_INDEX] = $_[0] * 1;
 }
@@ -293,7 +293,7 @@ sub strand {
 
     # Validate strand
     croak 'Value passed to strand must be undef, 0, 1, or -1'
-      unless ( $_[0] =~ /$Bio::Tiny::Range::Mixin::STRAND_REGEX/ );
+      unless ( $_[0] =~ /$Bio::Tiny::Range::Base::STRAND_REGEX/ );
     return $self->[$STRAND_INDEX] = $_[0] * 1;
 }
 
