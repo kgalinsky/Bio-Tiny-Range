@@ -469,13 +469,34 @@ aren't meant for use as IO methods.
 
 =head2 as_string
 
-Actually stringifies object.
+as_string is what the overloaded method points to.
 
 =cut
 
 {
     no warnings;
-    *as_string = \&as_string_lus;
+    sub as_string { shift->_as_string(@_) }
+    *_as_string = \&as_string_lus;
+}
+
+=head2 as_string_callback
+
+    MyRangeClass->as_string_callback( sub { ... } );
+
+Change the display behavior. Calling this method will set the as_string and
+_as_string methods in your class to the callback. You can also define
+_as_string in your class and it will get called through the overloaded quote
+operator.
+
+=cut
+
+{
+    no strict 'refs';
+
+    sub as_string_callback {
+        my $class = ref( $_[0] ) || $_[0];
+        *{"${class}::as_string"} = *{"${class}::_as_string"} = $_[1];
+    }
 }
 
 =head2 as_string_lus
@@ -511,7 +532,6 @@ like:
 sub as_string_53 {
     sprintf q{<5' %-6d %6d 3'>}, $_[0]->end5, $_[0]->end3;
 }
-
 
 =head2 strand_str
 
