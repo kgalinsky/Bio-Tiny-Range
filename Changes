@@ -1,5 +1,11 @@
 Revision history for Bio::Tiny::Range
 
+0.6.0	May 10 2011
+  - Added start/end methods
+  - Conglomerated methods under base
+  - Moved geometric methods to base
+  - Require new_lus method
+
 0.5.4	Apr  5 2011
   - Renamed from JCVI::Range to Bio::Tiny::Range
 
